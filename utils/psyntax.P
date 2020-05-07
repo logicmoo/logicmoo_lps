@@ -108,45 +108,8 @@ set_top_term(T) :- retractall(current_top_term(_)), (var(T)->F=var, N = -1 ; fun
 :- use_module(library(dialect/sicstus/system),[file_exists/1]).
 my_file_read(Stream,Term,Vars) :- read_term(Stream,Term,[variable_names(Vars)]).
 
-% Surface syntax .pl
-:- op(900,fy,user:(not)). 
-:- op(1200,xfx,user:(then)).
-:- op(1185,fx,user:(if)).
-:- op(1200,xfx,user:(if)).
-% the following is for "conditional expressions", (if C then T else E)
-% this maybe slightly confusing versus (if Antecedent then Consequent) rules, 
-% and other choices would be possible, e.g. Python's or C et.al... but this still feels
-% easier on newcomers, hoping that context (and the obligation to use parenthesis) helps:
-:- op(1100,xfy,user:else). 
-:- op(1050,xfx,user:(terminates)).
-:- op(1050,xfx,user:(initiates)).
-:- op(1050,xfx,user:(updates)).
-% Rejected:-( :- op(1050,fx,impossible). 
-:- op(1050,fx,user:(observe)).
-:- op(1050,fx,user:(false)).
-:- op(1050,fx,user:initially).
-:- op(1050,fx,user:fluents).
-:- op(1050,fx,user:events).
-:- op(1050,fx,user:prolog_events).
-:- op(1050,fx,user:actions).
-:- op(1050,fx,user:unserializable).
-% notice ',' has priority 1000
-:- op(999,fx,user:update).
-:- op(999,fx,user:initiate).
-:- op(999,fx,user:terminate).
-:- op(997,xfx,user:in).
-:- op(995,xfx,user:at).
-:- op(995,xfx,user:during).
-:- op(995,xfx,user:from). 
-:- op(994,xfx,user:to). % from's priority higher
-:- op(1050,xfy,::).
-
-% lps.js syntax extras
-:- op(1200,xfx,user:(<-)).
-:- op(1050,fx,user:(<-)).
-% -> is already defined as 1050, xfy, which will do given that lps.js does not support if-then-elses
-:- op(700,xfx,user:(<=)).
-
+%:- asserta(user:file_search_path(lps, lps_engine_directory('../utils/'))).
+:- user:use_module(lpsUtils(syntax)).
 user:(A<=B) :- A=<B.
 
 :- use_module('checker.P',[check_js_compliance/1]).

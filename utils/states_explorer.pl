@@ -141,7 +141,7 @@ bind_with_time(_,_).
 % TODO: deal properly with non user predicates!!!: 
 system_literal(G) :- predicate_property(G,built_in).
 
-thread_local phb_tuple/1. % preliminary Herbrand base
+:- thread_local phb_tuple/1. % preliminary Herbrand base
 
 % time(T) :- between(0,10,T). % time window
 
