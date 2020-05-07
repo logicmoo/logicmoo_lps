@@ -109,8 +109,8 @@ set_top_term(T) :- retractall(current_top_term(_)), (var(T)->F=var, N = -1 ; fun
 my_file_read(Stream,Term,Vars) :- read_term(Stream,Term,[variable_names(Vars)]).
 
 %:- asserta(user:file_search_path(lps, lps_engine_directory('../utils/'))).
-:- user:use_module(lpsUtils(syntax)).
-user:(A<=B) :- A=<B.
+:- use_module('../prolog/lps_syntax').
+user:'<='(A,B) :- A=<B.
 
 :- use_module('checker.P',[check_js_compliance/1]).
 

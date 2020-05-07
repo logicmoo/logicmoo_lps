@@ -1,26 +1,151 @@
-:- module(lps, [on_lps_read/1]).
+:- module(lps, [on_lps_read/1,on_lps_bof/2, on_lps_eof/1, 
+      dialect_on_load/3,get_prolog_load_context/1]).
 
-:- rexport(library(lps_syntax)).
+:- notrace(use_module(library(pengines),[pengine_self/1])).
+:- notrace(use_module(library(logicmoo_common))).
+:- notrace(use_module('../../utils/psyntax.P',[
+	syntax2p/4,dumploaded/2,term_colours/2,may_clear_hints/0,timeless_ref/1,set_top_term/1])).
+:- notrace(use_module('../../utils/checker.P',[check_js_compliance/1])).
 
-:- rexport('../../engine/interpreter.P').
+:- dynamic(lps_tmp:dialect_decl/1).
 
+get_prolog_load_context([variable_names=Vs,module=M,file=F,line=L,dialect=D,source=S,emulated_dialect=ED,system_dialect=PD,reload=R]):- 
+  ignore(source_location(F,L)),
+  ignore(prolog_load_context(file,F)),
+  ignore(prolog_load_context(variable_names,Vs)),
+  ignore(prolog_load_context(module,M)),
+  ignore(prolog_load_context(dialect,D)),
+  ignore(current_prolog_flag(emulated_dialect,ED)),
+  ignore(current_prolog_flag(dialect,PD)),
+  ignore(prolog_load_context(source,S)),
+  (prolog_load_context(reload,R)->true;R=false).
+
+:- module_transparent(dialect_on_load/3).
+:- meta_predicate(dialect_on_load(1,+,:)).
+                                                 
+:- discontiguous lps:'$exported_op'/3. 
 :- module_transparent(on_lps_read/1).
-on_lps_read(T):- notrace(T == end_of_file), !, listing(example_query/1).
-on_lps_read(:- T):- must(T),!.
+on_lps_read(T):- notrace(T == end_of_file),!,on_lps_eof(on_lps_read).  % ,set_prolog_flag(dialect,swi). % , listing(example_query/1).
+on_lps_read(:- T):- call(T),!.
 on_lps_read(T):- on_lps_read1(T).
 
-on_lps_read1((askable G)):- !,
-   assertz(askabl(G)).   
-on_lps_read1((assumable G)) :- !, 
-   assertz(assumabl(G)).   
-
-
 on_lps_read1(example_query(X)):- !,assertz(example_query(X)).
-on_lps_read1(random(X)):- !, random(X). 
-on_lps_read1(T):- \+ predicate_property(lps:T, imported_from(_)), !, must(lps:T).
-on_lps_read1(T):- must(T).
+%on_lps_read1(T):- \+ predicate_property(lps:T, imported_from(_)), !, must(lps:T).
+%on_lps_read1(random(X)):- !, random(X). 
+on_lps_read1(T):- call(assert(T)).
 
-:- include(library(dialect/lps_shared/dialect_loader_incl)).
+
+
+:- if( \+ current_module(lps_corner)).
+% :- notrace(reexport('../../engine/interpreter.P')).
+% :- ensure_loaded('../../engine/interpreter.P').
+:- [('../../engine/interpreter.P')].
+:- notrace(reexport(library(lps_corner))).
+:- endif.
+
+
+
+% :- multifile(setup_dialect/0).
+:- module_transparent(setup_dialect/0).
+:- module_transparent(setup_dialect_now/0).
+setup_dialect:- notrace(setup_dialect_now)->true;(trace,setup_dialect_now).
+
+setup_dialect_now:- prolog_load_context(module, user),
+  get_lps_alt_user_module(LPS_USER),
+  LPS_USER\==user,
+  '$set_source_module'(LPS_USER),!,setup_dialect.
+setup_dialect_now:- 
+  strip_module(_,FromM,_),
+  prolog_load_context(module, IntoM),
+  current_prolog_flag(dialect,FromD),
+  current_prolog_flag(emulated_dialect,IntoD),
+  prolog_load_context(file, File),
+  % IntoM:import(lps:dialect_on_load/3), 
+  get_prolog_load_context(Ctx0),
+  Ctx = [fromD=FromD,intoD=IntoD,fromM=FromM,intoM=IntoM,file=File|Ctx0],  
+  (IntoM\==user->IntoM:use_module(library(dialect/IntoD));true),
+  (IntoM\==user->notrace(IntoM:use_module(library(lps_syntax)));true),
+  % (IntoM\==user->notrace(IntoM:[('../../engine/interpreter.P')]);true),
+  (FromM\==IntoM -> FromM:import(lps:dialect_on_load/3); true),
+  
+  asserta((IntoM:term_expansion(T,FP,O,FPO):- (notrace(prolog_load_context(file, File)), FromM:lps_dialect_term_expansion(T,FP,O,FPO)))),
+  on_lps_bof(File,Ctx).
+on_lps_bof(File,Ctx):- 
+  asserta(lps_tmp:dialect_decl(Ctx)), writeln(on_lps_bof(File,Ctx)), !.
+
+on_lps_eof(W):- writeln(on_lps_eof(W)), 
+  ignore((current_prolog_flag(dialect,E),set_prolog_flag(emulated_dialect,E))),
+  ignore((prolog_load_context(module, LPS_USER),on_lps_eom(LPS_USER))).
+
+get_lps_alt_user_module(LPS_USER):- interpreter:lps_program_module(LPS_USER),!.
+get_lps_alt_user_module(LPS_USER):- is_lps_alt_user_module(LPS_USER),!.
+is_lps_alt_user_module(lps_user).
+lps_user:foo_lps_user.
+
+can_be_lps:- context_module(user),!.
+can_be_lps:- context_module(lps),!.
+can_be_lps:- get_lps_alt_user_module(LPS_USER),context_module(LPS_USER),!.
+can_be_lps:- context_module(LPS_USER),!,is_lps_alt_user_module(LPS_USER),!.
+
+on_lps_eom(LPS_USER):- is_lps_alt_user_module(LPS_USER),!, 
+  ignore(delete_import_module(user,LPS_USER)), 
+  ignore(delete_import_module(LPS_USER,user)),
+  ignore(add_import_module(user,LPS_USER,start)),
+  asserta(interpreter:lps_program_module(LPS_USER)),
+  '$set_source_module'(user),
+  listing(LPS_USER:_).
+
+:- multifile(lps_dialect_term_expansion/4).
+:- export(lps_dialect_term_expansion/4).
+lps_dialect_term_expansion(T,FP,O,FPO):- alt_dialect_term_expand(T,O),!, O\==T,FPO=FP.
+lps_dialect_term_expansion(T,FP,O,FPO):- trace,
+  notrace((
+      nonvar(FP), 
+     (prolog_load_context(dialect,D);current_prolog_flag(dialect,D)) ->      
+        prolog:dialect_reads(D,P1))),
+  get_prolog_load_context(DC),  
+  make_dialect_on_load(P1,T,DC,O),
+  !, O\==T,FPO=FP,writeln(O-->T).
+make_dialect_on_load( _,T, _,O):- alt_dialect_term_expand(T,O),!.
+make_dialect_on_load(P1,T,DC,O):- O = (:- dialect_on_load(P1,T,DC)).
+
+
+alt_dialect_term_expand(O,O):- O == end_of_file,ignore(on_lps_eof(alt_dialect_term_expand)),fail.
+alt_dialect_term_expand(NiceTerm,'$source_location'(File, Line):ExpandedTerms) :- 
+	% somehow the source location is not being kept, causing later failure of clause_info/5 :-(
+	can_be_lps, % LPS programs are in the user module
+	prolog_load_context(source,File), prolog_load_context(term_position,TP), stream_position_data(line_position,TP,Line),
+	catch(lps_nlp_translate(NiceTerm,ExpandedTerms),_,fail), !. % hook for LogicalContracts extension
+alt_dialect_term_expand(NiceTerm,ExpandedTerm) :- 
+	can_be_lps, % LPS programs are in the user module
+	may_clear_hints, set_top_term(NiceTerm),
+	% current_syntax(lps2p,true), In the future we may want to support other syntax conversions
+	% variable names probably not available here, but we don't care about lpsp2p syntax anymore:
+	% somehow this fails to... some terms;-) prolog_load_context(file,File), mylog(normal-File),
+	syntax2p(NiceTerm,[],lps2p,ExpandedTerm). 
+% alt_dialect_term_expand(O,O):-!.
+alt_dialect_term_expand(_,_):- fail.
+
+
+
+dialect_on_load(P1,T,DC):-
+ strip_module(DC,_,DC0),
+ b_setval('$term',T),
+ b_setval('$prolog_load_context',DC0),
+ ignore((memberchk(variable_names=Vs,DC0),
+         b_setval('$variable_names',Vs))),
+ call(P1,T).    dialect_on_load(P1,T,DC):-
+ strip_module(DC,_,DC0),
+ b_setval('$term',T),
+ b_setval('$prolog_load_context',DC0),
+ ignore((memberchk(variable_names=Vs,DC0),
+         b_setval('$variable_names',Vs))),
+ call(P1,T).    
+
+:- multifile(prolog:dialect_reads/2).
+:- dynamic(prolog:dialect_reads/2).
 
 prolog:dialect_reads(lps, on_lps_read).
+
+
 
