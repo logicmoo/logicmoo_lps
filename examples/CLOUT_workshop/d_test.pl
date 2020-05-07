@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % A few examples of display specifications
 % Now there's no need for dummy fluents anymore, just use d(timeless,...).
 

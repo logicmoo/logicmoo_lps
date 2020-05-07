@@ -1,4 +1,8 @@
 
+
+:- expects_dialect(lps).
+
+
 maxTime(3).
 
 reactive_rule([happens(sort(_16392),_16398,_16400)],[quicksort(_16392,_16412),happens(sorted(_16412),_16400,_16430)]).

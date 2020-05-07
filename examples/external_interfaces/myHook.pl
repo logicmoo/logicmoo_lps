@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 /*
 Minimal example for hooking a Prolog predicate.
 my_hook(-ExternalObservations)

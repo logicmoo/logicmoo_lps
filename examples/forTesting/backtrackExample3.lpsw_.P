@@ -1,4 +1,8 @@
 
+
+:- expects_dialect(lps).
+
+
 initial_state([]).
 
 reactive_rule([happens(e1,_126,_128)],[happens(m1,_140,_142),happens(m2,_154,_156),tc(_128=<_140),tc(_128=<_154)]).

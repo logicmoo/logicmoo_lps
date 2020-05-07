@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % fire2
 
 

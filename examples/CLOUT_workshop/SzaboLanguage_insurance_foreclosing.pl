@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 :- include(example('SzaboLanguage_insurance_base.pl')).
 
 % should succeed because of foreclosing

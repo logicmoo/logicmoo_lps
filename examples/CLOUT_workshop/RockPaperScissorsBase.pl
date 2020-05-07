@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % Rock, Paper, Scissors
 maxTime(5). % Simulate over 5 cycles
 

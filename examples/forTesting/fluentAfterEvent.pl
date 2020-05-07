@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 maxTime(4).
 
 events default_occurs(_).

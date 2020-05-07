@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 maxTime(5).
 events party/1.
 actions askMoney/2.

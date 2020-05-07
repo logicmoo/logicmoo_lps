@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 maxTime(10).
 
 events to(_Agent,_Right).

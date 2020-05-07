@@ -1,4 +1,8 @@
 
+
+:- expects_dialect(lps).
+
+
 /* Fluents regarding units */
 fluent(person(_, _)).
 fluent(position(_, _, _, _)).

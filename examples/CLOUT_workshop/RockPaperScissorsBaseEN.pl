@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % Rock, Paper, Scissors
 % 
 en("

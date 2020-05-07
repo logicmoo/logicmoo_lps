@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 events e(_), f(_).
 actions a(_).
 

@@ -1,4 +1,8 @@
 
+
+:- expects_dialect(lps).
+
+
 maxTime(6).
 
 reactive_rule([happens(bears_witness(_6132),_6138,_6140),happens(refuses(_6150),_6138,_6140)],[happens(gets(_6132,0),_6140,_6178),happens(gets(_6150,3),_6140,_6178)]).

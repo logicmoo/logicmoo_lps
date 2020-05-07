@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 maxRealTime(30).
 minCycleTime(1).
 fluents light(_,_), location(_,_).

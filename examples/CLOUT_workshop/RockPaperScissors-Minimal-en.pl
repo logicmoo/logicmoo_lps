@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % Formal English specification of the game:
 en("
 the events are:

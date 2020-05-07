@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % for XSB only: 
 % :- import append/3 from basics.
 

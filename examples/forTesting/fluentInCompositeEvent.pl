@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 maxTime(5).
 
 fluents hungry, foodAtHome, neighbourHome, haveMoney.

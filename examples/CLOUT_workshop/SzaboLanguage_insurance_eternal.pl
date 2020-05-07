@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 :- include(example('SzaboLanguage_insurance_base.pl')).
 
 % would never end, because the lawyer allowed foreclosing in any later future... but 

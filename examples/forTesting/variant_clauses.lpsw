@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % test that requires l_event clauses to be properly used
 initial_state([f(1,2)]).
 observe([start],2).

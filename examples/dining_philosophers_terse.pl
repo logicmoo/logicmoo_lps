@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % First, "environmental" information
 initial_state([available(fork(0)),available(fork(1)),available(fork(2)),available(fork(3)),available(fork(4))]).
 

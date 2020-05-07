@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 en("
 
 the maximum time is 120.

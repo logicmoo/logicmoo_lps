@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 /*
   LPS test results file generated on 2018-2-28 at 16:30:39
   on Prolog swi(7,7,2,[]) for program file:

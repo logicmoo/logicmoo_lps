@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % consolidated loan example.
 
 :- include(system('date_utils.pl')).  

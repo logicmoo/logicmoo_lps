@@ -1,4 +1,8 @@
 
+
+:- expects_dialect(lps).
+
+
 initial_state([f(1,2)]).
 
 observe([start],2).

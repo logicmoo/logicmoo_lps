@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 :- include(example('SzaboLanguage_insurance_base.pl')).
 
 observe pledge(allGoods(counterparty),"Some key to all Counterparty goods") at 2018/5/20.

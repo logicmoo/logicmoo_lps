@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 /*
   LPS test results file generated on 2017-02-05 at 13:05:04
   on Prolog xsb(3,7,,_h8495) for program file:

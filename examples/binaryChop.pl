@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 maxTime(9).
 
 fluents left/1, right/1, searching/1, middle/1.

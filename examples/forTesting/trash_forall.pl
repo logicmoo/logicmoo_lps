@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % trash.lps
 maxTime(10).
 fluents locked(_), trash(_), bin(_).

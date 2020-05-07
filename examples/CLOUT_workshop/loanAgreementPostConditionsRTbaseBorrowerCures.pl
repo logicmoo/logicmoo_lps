@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 :- include(example('loanAgreementPostConditionsRTbase.pl')).
 % Borrower cures a violation of covenant
 %

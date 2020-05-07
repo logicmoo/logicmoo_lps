@@ -1,4 +1,8 @@
 
+
+:- expects_dialect(lps).
+
+
 event(start_game(_2488)).
 
 action(moveperson(_2488,_2490,_2492)).

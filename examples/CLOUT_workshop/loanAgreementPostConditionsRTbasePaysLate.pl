@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 :- include(example('loanAgreementPostConditionsRTbase.pl')).
 % Borrower pays late but cures the default
 %

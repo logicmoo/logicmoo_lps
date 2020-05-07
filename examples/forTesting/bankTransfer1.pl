@@ -1,4 +1,8 @@
 
+
+:- expects_dialect(lps).
+
+
  
 maxTime(9).
 actions transfer(From, To, Amount).

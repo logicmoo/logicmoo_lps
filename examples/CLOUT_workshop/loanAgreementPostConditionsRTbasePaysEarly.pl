@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 :- include(example('loanAgreementPostConditionsRTbase.pl')).
 % Borrower pays early. Against the contract.
 % Fortunately, the lender does not complain.

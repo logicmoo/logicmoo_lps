@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % Use with option 'manual', and inject event 'a'.
 maxTime(4).
 %observe a from 1 to 2.

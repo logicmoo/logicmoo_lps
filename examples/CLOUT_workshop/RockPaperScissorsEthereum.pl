@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % Rock, Paper, Scissors "gambling" on Ethereum
 maxRealTime(300). % 5 minutes game lifetime
 

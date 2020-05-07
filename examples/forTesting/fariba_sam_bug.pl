@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % This illustrates the need for "backtracking" accross cycles
 
 maxTime(10).

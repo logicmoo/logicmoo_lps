@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 %maxTime(10).
 maxRealTime(0.05). % 50 mS
 

@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 maxTime(5).
 
 simulatedRealTimeBeginning('2014-06-01'). 

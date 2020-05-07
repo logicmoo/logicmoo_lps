@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % just rains.lps
 maxRealTime(30).
 minCycleTime(1).

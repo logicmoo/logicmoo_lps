@@ -1,3 +1,7 @@
+
+
+:- expects_dialect(lps).
+
 % First example from https://nakamotoinstitute.org/contract-language/
 
 simulatedRealTimeBeginning('2002-07-01'). 
