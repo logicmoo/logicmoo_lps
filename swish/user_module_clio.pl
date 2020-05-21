@@ -7,8 +7,8 @@
 :- multifile sandbox:safe_primitive/1.
  
 % For debugging:
-% sandbox:safe_primitive(swish_highlight:server_tokens(_)).  % swish_highlight:server_tokens(source).
-% sandbox:safe_primitive(swish_highlight:show_mirror(_)).
+sandbox:safe_primitive(swish_highlight:server_tokens(_)).  % swish_highlight:server_tokens(source).
+sandbox:safe_primitive(swish_highlight:show_mirror(_)).
 % can not print output as usual, would interfere with http responses; uncomment the following for a log:
 
 /*
@@ -22,14 +22,15 @@ sandbox:safe_primitive(user:mylog(_M)).
 %:- set_setting_default(http:logfile, 'data/httpd.log'). % swish's writable sub directory
 
 :- multifile swish_config:config/2.
-swish_config:config(show_beware,false).
-swish_config:config(community_examples,true).
+:- dynamic swish_config:config/2.
+%swish_config:config(show_beware,false).
+%swish_config:config(community_examples,true).
 % don't see the point: swish_config:config(public_access,true). % HACK here
-swish_config:config(chat,false).
+% swish_config:config(chat,false).
 % Forcing SWISH to accept both of the following as legitimate; 
 % only the first will get to the Javascript side, I think... but no harm done (apparently):
-swish_config:config(include_alias,	example).
-swish_config:config(include_alias,	system).
+%swish_config:config(include_alias,	example).
+%swish_config:config(include_alias,	system).
 % the above facts must come before this...:
 
 :- if(exists_source(swish(swish))).
@@ -39,23 +40,29 @@ swish_config:config(include_alias,	system).
 % :- use_module('../../swish/swish').
 :- endif.
 
-:- use_module(swish(lib/render)).
+%:- use_module(swish(render)).
 :- use_module(library(http/http_dispatch)).
-:- use_module(swish(lib/plugin/login)).
-:- use_module(swish(lib/authenticate)).
+%:- use_module(swish(lib/plugin/login)).
+%:- use_module(swish(lib/authenticate)).
 :- use_module(library(settings)).
 
+
 % LPS visualizations will appear courtesy of either of two SWISH answer renderers:
+:- multifile('swish renderer'/2). % to avoid SWISH warnings in other files
+:- dynamic('swish renderer'/2). % to avoid SWISH warnings in other files
 :- use_module(lps_2d_renderer,[]). % need not and can not import the rendering predicate into here
 :- use_module(lps_timeline_renderer,[]).
-:- multifile 'swish renderer'/2. % to avoid SWISH warnings in other files
 :- use_rendering(lps_2d). % this will be the preferred... if available for the current visualization
 :- use_rendering(lps_timeline).
 :- use_rendering(graphviz). % for state/transition diagrams
 
 :- multifile pengines:prepare_module/3.
-pengines:prepare_module(_Module, swish, _Options) :- 
-	style_check(-discontiguous), style_check(-singleton).
+pengines:prepare_module(Module, swish, Options) :- 
+	style_check(-discontiguous), style_check(-singleton),
+        Module:use_module(library(lps_syntax)),
+        asserta(Module:swish_options(Options)).
+
+        
 
 % If you consider refactoring this out to somewhere else: somehow these must be after use_module('../../swish/swish'):
 :- use_module('../utils/visualizer.P'). % this loads LPS
@@ -86,6 +93,21 @@ sandbox:safe_primitive(redisclient:get_keys(_)).
 sandbox:safe_primitive(redisclient:get_channels(_)).
 sandbox:safe_primitive(redisclient:kill_all).
 
+sandbox:safe_primitive(system:b_setval(_,_)).
+sandbox:safe_primitive(system:trace).
+sandbox:safe_primitive(system:notrace).
+sandbox:safe_primitive(system:tracing).
+sandbox:safe_primitive(edinburgh:debug).
+sandbox:safe_primitive(system:deterministic(_)).
+
+
+:-  swish_pep:import(swish_authenticate:user_property/2),
+    pengines:import(swish_authenticate:authenticate/2).
+
+:- user:use_module(swish(lib/authenticate)).
+:- system:use_module(swish(lib/authenticate)).
+
+% :- swish_pep:use_module(library(swish/authenticate)).
 /*
 The following could be used to prevent pengines (remote goal) access... but bear in mind that swish (user) browsers communicate directly
 to the server, so their IPs would have to be allowed. I guess full authentication is needed to prevent remote pengines usage.
@@ -104,6 +126,7 @@ lps_user(unknown_user,unknown_email).
 
 % hack SWISH's http authentication hook in lib/authenticate.pl to maintain the above:
 :- dynamic(pengines:authentication_hook/3). % Needed for SWI Prolog 8.x
+% hide_ah
 :- asserta((pengines:authentication_hook(Request, _Application, User) :- !,
     authenticate(Request, User), update_user(Request,User))).
 %TODO: try instead http_current_request(Request) ??
@@ -119,6 +142,7 @@ update_user(_Request,User) :-
 		assert(transaction_lps_user(User.identity,Email)).   % local (e.g. HTTP-authenticated) account
 update_user(_Request,_User) :- 
 	assert(transaction_lps_user(unknown_user,unknown_email)).
+
 
 % patch SWISH so that "local" (HTTP authenticated users) are kept sandboxed:
 :- dynamic(swish_pep:approve/2). % Needed for SWI Prolog 8.x. 
@@ -143,6 +167,7 @@ swish_highlight:style(time,time,[text,base(atom)]). % atom?
 
 % HACK colouring of Prolog clause heads when they're referred only by LPS clauses
 :- dynamic(swish_highlight:style/3). % Needed in SWI Prolog 8.1.1... who knows for how long this will be admissible ;-)
+no_style
 :- asserta((swish_highlight:style(head(unreferenced, Head), Type, Attributes) :-
 	nonvar(Head),
 	functor(Head,F,N), 
@@ -264,7 +289,7 @@ serve_lps_resources(Request) :- % http://localhost:3050/lps/foo/Gruntfile.js wor
         http_reply_file(lps_resources(Info), [], Request).
 
 % hack SWISH to inject our CSS and Google Analytics fragment...
-:- use_module(swish(lib/page)).
+%:- use_module(swish(lib/page)).
 :- use_module(library(http/html_write)).
 :- use_module(library(http/http_path)).
 
@@ -281,19 +306,23 @@ serve_lps_resources(Request) :- % http://localhost:3050/lps/foo/Gruntfile.js wor
 ',[Key]), assert(google_analytics_script(JS)).
 
 :- multifile swish_config:reply_page/1. % redefine SWISH's page maker:
+:- dynamic swish_config:reply_page/1. % redefine SWISH's page maker:
+
+skip_config
+:- asserta((
 swish_config:reply_page(Options) :- 
 	reply_html_page(
 	    swish(main),
 	    \(swish_page:swish_title(Options)),
-	    \my_swish_page(Options)).
+	    \my_swish_page(Options)),!)).
 
 my_swish_page(Options) -->
 	my_swish_navbar(Options),
-	swish_page:swish_content(Options). % no need to inject resources here again... is there??
+	swish_page:swish_content(Options),!. % no need to inject resources here again... is there??
 
 my_swish_navbar(Options) -->
 	my_swish_resources, % this may have to move to after the next call's inhards...
-	swish_page:swish_navbar(Options).
+	swish_page:swish_navbar(Options),!.
 	
 my_swish_resources -->
 	{google_analytics_script(JS)},
@@ -339,3 +368,10 @@ sandbox:safe_primitive(interpreter:uretractall(_)).
 	Tests whether a given fluent is defined by the system (not declared by the user).
 */
 system_fluent(Fl) :- interpreter:system_fluent(Fl).
+
+%:- use_module(lps_server_UI).
+%:- use_rendering(lps_server_UI).
+ % place after the above loading so we don't use it...:
+% :- ensure_loaded(term_expander).
+
+

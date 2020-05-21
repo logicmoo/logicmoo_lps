@@ -1700,7 +1700,7 @@ parse_options(Options) :-
 	( ((member(run_test,Options);member(make_test,Options);member(no_parallel,Options); \+member(dc,Options)), member(restore(_),Options)) ->
 		print_error(error, 'run_test/make_test/no_parallel options are incompatible with restore; restore also requires dc'), fail
 		; true),	
-	( (\+ member(non_prospective,Options), \+ member(dc,Options)) ->
+	( (fail, \+ member(non_prospective,Options), \+ member(dc,Options)) ->
 		print_error(error, 'prospective option requires dc'), fail
 		; true),	
 	parse_options_(Options).

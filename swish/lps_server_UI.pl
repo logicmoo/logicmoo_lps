@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 :- use_module(library(http/js_write)).
 :- use_module(library(http/http_json)).
 :- use_module(library(http/http_parameters)).
-:- use_module('../../swish/lib/render').
+%:- use_module(swish(lib/render)).
 
 % explicit imports below, commenting this to avoid "weak imports" warnings 
 % :- use_module('../engine/interpreter.P').
@@ -84,7 +84,7 @@ check_powerful_user(Op) :- throw(unsufficient_lps_user_privilege_for(Op)).
 
 lps_user_is_super :- lps_user(User), super_user(User).
 
-any_call(G) :- check_powerful_user(sudo), G.
+any_call(G) :- check_powerful_user(sudo), call(G).
 
 sandbox:safe_primitive(lps_server_UI:any_call(G)) :- nonvar(G).
 
