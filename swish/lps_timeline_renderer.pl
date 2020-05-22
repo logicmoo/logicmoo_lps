@@ -5,7 +5,7 @@
 :- use_module(library(http/html_write)).
 :- use_module(library(http/term_html)).
 :- use_module(library(http/js_write)).
-%:- use_module(swish(lib/render)).
+:- use_module(swish(lib/render)).
 
 :- register_renderer(lps_timeline, "Timeline of a LPS execution").
 

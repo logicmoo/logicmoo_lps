@@ -1,3 +1,5 @@
+:- if((prolog_load_context(source,S),prolog_load_context(file,S))).
+
 :- module(lps_syntax,[
      op(900,fy,(not)), 
      op(1200,xfx,(then)),
@@ -33,6 +35,8 @@
 % -> is already defined as 1050, xfy, which will do given that lps.js does not support if-then-elses
      op(700,xfx,(<=))
   ]).
+
+:- endif.
 
 % Surface syntax .pl
 :- op(900,fy,(not)). 

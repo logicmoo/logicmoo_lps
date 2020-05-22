@@ -252,7 +252,7 @@ print_syntax_error(Type,Message,Position) :-
 	). 
 
 print_error(Type,Message,Position) :- option(swish), option(background(_)), !, % avoid disturbing SWISH's textual output
-	catch( http_log('lps ~w: ~w ~w', [Type,Message,Position]),_,true),
+	catch( call(call,http_log('lps ~w: ~w ~w', [Type,Message,Position])),_,true),
 	do_write([Type,':',Message,' ',Position]).
 print_error(Type,Message,Position) :- 
 	print_message(Type,lps_error(Message,Position)). % SWI's universal messaging pipeline
@@ -1700,7 +1700,7 @@ parse_options(Options) :-
 	( ((member(run_test,Options);member(make_test,Options);member(no_parallel,Options); \+member(dc,Options)), member(restore(_),Options)) ->
 		print_error(error, 'run_test/make_test/no_parallel options are incompatible with restore; restore also requires dc'), fail
 		; true),	
-	( (fail, \+ member(non_prospective,Options), \+ member(dc,Options)) ->
+	( (\+ member(non_prospective,Options), \+ member(dc,Options)) ->
 		print_error(error, 'prospective option requires dc'), fail
 		; true),	
 	parse_options_(Options).
@@ -1993,7 +1993,8 @@ test_items_ok_([A|An],[lps_gigantic(Size)|Tn]) :- !,
 	\+ \+ (numbervars(A),my_term_size(A,Size_), Size_ == Size), 
 	test_items_ok_(An,Tn).
 test_items_ok_([A|An],[T|Tn]) :- !,
-	variant_(A,T),
+	% variant_(A,T),
+	variant(A,T),
 	test_items_ok(An,Tn).
 test_items_ok_([],[]).
 
@@ -2740,7 +2741,7 @@ system_fluent(lps_user(UserID,Email),lps_user(UserID,Email)).
 lps_user(User) :- lps_user(User,_Email).
 
 % Currently this is valid for SWISH only
-lps_user(User,Email) :- catch(user:lps_user(User,Email),_,fail), !.
+lps_user(User,Email) :- catch(call(call,user:lps_user(User,Email)),_,fail), !.
 lps_user(unknown_user,unknown_email).
 
 % for introspection only:

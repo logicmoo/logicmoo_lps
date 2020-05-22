@@ -40,11 +40,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 :- use_module(library(http/js_write)).
 :- use_module(library(http/http_json)).
 :- use_module(library(http/http_parameters)).
-%:- use_module(swish(lib/render)).
+:- use_module(swish(lib/render)).
 
 % explicit imports below, commenting this to avoid "weak imports" warnings 
-% :- use_module('../engine/interpreter.P').
-:- use_module('../utils/visualizer.P').
+% :- use_module(library('../engine/interpreter.P')).
+:- use_module(library('../utils/visualizer.P')).
 
 :- multifile sandbox:safe_primitive/1.
 
@@ -84,7 +84,7 @@ check_powerful_user(Op) :- throw(unsufficient_lps_user_privilege_for(Op)).
 
 lps_user_is_super :- lps_user(User), super_user(User).
 
-any_call(G) :- check_powerful_user(sudo), call(G).
+any_call(G) :- check_powerful_user(sudo), G.
 
 sandbox:safe_primitive(lps_server_UI:any_call(G)) :- nonvar(G).
 
@@ -310,8 +310,8 @@ fluent_spans_row(lps_saved_state(_,_,_,_,_,_,_,_)).
 
 :- http_handler('/lps_server/events/', lps_server_UI:lps_serve_events_fluents, [prefix]).
 % .../lps_server/events/lps1?events=[pickup(kant,fork1)]
-% http://localhost:3050/lps_server/events/lps1?events=[pickup(kant,fork1)]&fluents=[available(_)]&after=true
-% http://localhost:3050/lps_server/events/lps1?events=[lps_terminate]&fluents=[lps_saved_state(_,_,_,_,_,_,_,_)]&after=true  suspends and shows saved state
+% http://localhost:3020/lps_server/events/lps1?events=[pickup(kant,fork1)]&fluents=[available(_)]&after=true
+% http://localhost:3020/lps_server/events/lps1?events=[lps_terminate]&fluents=[lps_saved_state(_,_,_,_,_,_,_,_)]&after=true  suspends and shows saved state
 % Inject events into server and sample and return fluents; if after=true, sampling occurs  the beginning of the next LPS cycle
 % (after the events are accepted, 1+ event injection cycle), otherwise at current cycle (prior to the events changing state)
 lps_serve_events_fluents(Request) :-
@@ -442,7 +442,8 @@ twoD(Request) :-
 
 % twoDviewElements(+LPS_ID,+WaitForWindowLoading,-CommonResources,-Script,-Canvas)
 twoDviewElements(LPS_ID, MinCT, WaitForWindow, [
-	script(src("/bower_components/jquery/dist/jquery.min.js"),[]), % use require as SWISH does...??
+	script(src("/node_modules/jquery/dist/jquery.min.js"),[]), % use require as SWISH does...??
+	script(src("/bower_components/jquery/dist/jquery.min.js"),[]),
 	script(src("/lps/2dWorld.js"),[]), 
 	script(src("/lps/2dWorld_lazy.js"),[]) ], 
 	\js_script({|javascript(LPS_ID,MY_SELECTOR,MinCT,WaitForWindow)||

@@ -37,7 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 :- module(checker,[ 
 	check_js_compliance/1, lps_literals/1
 	]).
-
+%
 :- use_module('../engine/interpreter.P').
 
 % check_js_compliance(-Notices)  

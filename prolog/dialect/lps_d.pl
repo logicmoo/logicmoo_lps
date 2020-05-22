@@ -1,9 +1,3 @@
-
-:- module(lps_corner,[]).
-
-
-end_of_file.
-
 :- module(lps, [on_lps_read/1,on_lps_bof/2, on_lps_eof/1, 
       dialect_on_load/3,get_prolog_load_context/1]).
 %
@@ -58,11 +52,11 @@ on_lps_read1(T):- call(assert(T)).
 :- module_transparent(setup_dialect_now/0).
 setup_dialect:- notrace(setup_dialect_now)->true;(trace,setup_dialect_now).
 
-
 setup_dialect_now :- 
    use_module(library(lps_syntax)),
    use_module(library('../engine/interpreter.P')),
-   use_module(library('../swish/term_expander.pl')),!.
+   use_module(term_expander),
+   dumpST.
    
 
 
@@ -200,7 +194,6 @@ dialect_on_load(P1,T,DC):-
 :- dynamic(prolog:dialect_reads/2).
 
 prolog:dialect_reads(lps, on_lps_read).
-
 
 
 

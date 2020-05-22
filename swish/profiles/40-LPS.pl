@@ -1,6 +1,6 @@
 % Logic Production Systems
 
-:- notrace(use_module(library(logicmoo_common))).
+% :- notrace(use_module(library(logicmoo_common))).
 
 :- expects_dialect(lps).
 

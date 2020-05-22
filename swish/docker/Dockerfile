@@ -31,7 +31,7 @@ VOLUME $LPS_DIR/engine/logs
 # probably unneeded: RUN chmod a+w logs  # ...or something finer
 
 WORKDIR $LPS_DIR/swish/web/lps
-RUN bower install vis paper
+RUN bower install vis paper --allow-root
 
 #We actually use only redis-cli, but...
 RUN apt-get update && apt-get install -y wget

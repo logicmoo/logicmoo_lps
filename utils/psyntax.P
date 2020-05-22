@@ -21,7 +21,6 @@
    
    LIMITATION regarding lps.js files: they must NOT use # line comments; please use Prolog's % comments instead
 */
-
 :- module(psyntax,[ 
 	lps2p_file/2, lps2p/3, syntax2p_file/4, syntax2p/4, syntax2p_literal/7, golps/2, golps/1, dumpjs/2, dumpjs/1,
 	file_generator_name/2, may_clear_hints/0,term_colours/2,timeless_ref/1, set_top_term/1, dumploaded/2
@@ -109,7 +108,8 @@ set_top_term(T) :- retractall(current_top_term(_)), (var(T)->F=var, N = -1 ; fun
 my_file_read(Stream,Term,Vars) :- read_term(Stream,Term,[variable_names(Vars)]).
 
 %:- asserta(user:file_search_path(lps, lps_engine_directory('../utils/'))).
-:- use_module('../prolog/lps_syntax').
+% Surface syntax .pl
+:- use_module(library(lps_syntax)).
 user:'<='(A,B) :- A=<B.
 
 :- use_module('checker.P',[check_js_compliance/1]).
@@ -180,7 +180,9 @@ golps(LPSP_file) :- golps(LPSP_file,[dc]).
 
 % Support for lps.js
 dumpjs(F,Options) :- 
-	(member(swish,Options) -> go(F,[initialize_only|Options]); golps(F,[initialize_only|Options])),
+	(member(swish,Options) 
+	 -> interpreter:go(F,[initialize_only|Options])
+	 ;  golps(F,[initialize_only|Options])),
 	check_js_compliance(Notices),
 	print_error_notices(Notices),
 	date_stamp(D),

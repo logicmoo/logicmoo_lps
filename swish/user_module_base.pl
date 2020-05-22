@@ -6,9 +6,6 @@
 
 :- multifile sandbox:safe_primitive/1.
  
-% For debugging:
-% sandbox:safe_primitive(swish_highlight:server_tokens(_)).  % swish_highlight:server_tokens(source).
-% sandbox:safe_primitive(swish_highlight:show_mirror(_)).
 % can not print output as usual, would interfere with http responses; uncomment the following for a log:
 
 /*
@@ -22,10 +19,11 @@ sandbox:safe_primitive(user:mylog(_M)).
 %:- set_setting_default(http:logfile, 'data/httpd.log'). % swish's writable sub directory
 
 :- multifile swish_config:config/2.
-swish_config:config(show_beware,false).
-swish_config:config(community_examples,true).
+:- dynamic swish_config:config/2.
+% swish_config:config(show_beware,false).
+% swish_config:config(community_examples,true).
 % don't see the point: swish_config:config(public_access,true). % HACK here
-swish_config:config(chat,false).
+% swish_config:config(chat,false).
 % Forcing SWISH to accept both of the following as legitimate; 
 % only the first will get to the Javascript side, I think... but no harm done (apparently):
 swish_config:config(include_alias,	example).
@@ -33,10 +31,15 @@ swish_config:config(include_alias,	system).
 % the above facts must come before this...:
 
 :- if(exists_source(swish(swish))).
-:- use_module(swish(swish)).
+ :- use_module(swish(swish)).
 :- else.
-:- use_module('/home/prologmud_server/swish/swish.pl').
-% :- use_module('../../swish/swish').
+ :- if(exists_source(library('swish/swish.pl'))).
+  :- use_module(library('swish/swish.pl')).
+ :- else.
+  :- if(exists_source('../../swish/swish.pl')).
+   :- use_module('../../swish/swish.pl').
+  :- endif.
+ :- endif.
 :- endif.
 
 :- use_module(swish(lib/render)).
@@ -46,24 +49,27 @@ swish_config:config(include_alias,	system).
 :- use_module(library(settings)).
 
 % LPS visualizations will appear courtesy of either of two SWISH answer renderers:
+:- multifile('swish renderer'/2). % to avoid SWISH warnings in other files
+:- dynamic('swish renderer'/2). % to avoid SWISH warnings in other files
 :- use_module(lps_2d_renderer,[]). % need not and can not import the rendering predicate into here
 :- use_module(lps_timeline_renderer,[]).
-:- multifile 'swish renderer'/2. % to avoid SWISH warnings in other files
 :- use_rendering(lps_2d). % this will be the preferred... if available for the current visualization
 :- use_rendering(lps_timeline).
 :- use_rendering(graphviz). % for state/transition diagrams
 
 :- multifile pengines:prepare_module/3.
-pengines:prepare_module(_Module, swish, _Options) :- 
-	style_check(-discontiguous), style_check(-singleton).
+pengines:prepare_module(Module, swish, Options) :- 
+	style_check(-discontiguous), style_check(-singleton),       
+        asserta(Module:swish_options([swish_module=Module,Options])).
+        
 
 % If you consider refactoring this out to somewhere else: somehow these must be after use_module('../../swish/swish'):
-:- use_module('../utils/visualizer.P'). % this loads LPS
-:- use_module('../utils/psyntax.P',[
+:- use_module(library('../utils/visualizer.P')). % this loads LPS
+:- use_module(library('../utils/psyntax.P'),[
 	syntax2p/4,dumploaded/2,term_colours/2,may_clear_hints/0,timeless_ref/1,set_top_term/1
 	]).
-:- use_module('../utils/states_explorer.pl',[explore/2]).
-:- use_module('../utils/redis-client.pl').
+:- use_module(library('../utils/states_explorer.pl'),[explore/2]).
+:- use_module(library('../utils/redis-client.pl')).
 
 % This will be useful below, as file searching handling of relative paths differs from what's used
 % by use_module and friends.
@@ -85,6 +91,13 @@ sandbox:safe_primitive(redisclient:set_key(_,_)).
 sandbox:safe_primitive(redisclient:get_keys(_)).
 sandbox:safe_primitive(redisclient:get_channels(_)).
 sandbox:safe_primitive(redisclient:kill_all).
+
+sandbox:safe_primitive(system:b_setval(_,_)).
+sandbox:safe_primitive(system:trace).
+sandbox:safe_primitive(system:notrace).
+sandbox:safe_primitive(system:tracing).
+sandbox:safe_primitive(edinburgh:debug).
+sandbox:safe_primitive(system:deterministic(_)).
 
 /*
 The following could be used to prevent pengines (remote goal) access... but bear in mind that swish (user) browsers communicate directly
@@ -289,11 +302,11 @@ swish_config:reply_page(Options) :-
 
 my_swish_page(Options) -->
 	my_swish_navbar(Options),
-	swish_page:swish_content(Options). % no need to inject resources here again... is there??
+	swish_page:swish_content(Options),!. % no need to inject resources here again... is there??
 
 my_swish_navbar(Options) -->
 	my_swish_resources, % this may have to move to after the next call's inhards...
-	swish_page:swish_navbar(Options).
+	swish_page:swish_navbar(Options),!.
 	
 my_swish_resources -->
 	{google_analytics_script(JS)},
@@ -330,6 +343,10 @@ sandbox:safe_primitive(interpreter:uasserta(_)).
 sandbox:safe_primitive(interpreter:uassertz(_)). 
 sandbox:safe_primitive(interpreter:uretract(_)). 
 sandbox:safe_primitive(interpreter:uretractall(_)). 
+
+% For debugging:
+sandbox:safe_primitive(swish_highlight:server_tokens(_)).  % swish_highlight:server_tokens(source).
+sandbox:safe_primitive(swish_highlight:show_mirror(_)).
 
 
 /** 

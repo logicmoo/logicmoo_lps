@@ -1,5 +1,5 @@
 // Used by lps_timeline_renderer.pl
-var lpsTimelineCSSloaded; // global scope
+var lpsTimelineCSSloaded; // global  scope
 function drawTimeline(T) {
 	if (!( $.ajaxScript )) 
 	return;

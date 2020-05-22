@@ -1,6 +1,7 @@
 % library to access a REDIS server via the redis-cli CLI utility
 % /Applications/SWI-Prolog8.1.1.app/Contents/MacOS/swipl -l redisclient.pl
 %TODO: add psubscribe(Pattern) ?
+%
 :- module(redisclient,[
     create/2, create/3, get_key/2, set_key/2, get_keys/1, get_channels/1, kill_all/0
     ]).
