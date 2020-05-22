@@ -23,11 +23,11 @@ lps_f_term_expansion(_Module,NiceTerm,ExpandedTerm) :-
 	% somehow this fails to... some terms;-) prolog_load_context(file,File), mylog(normal-File),
 	syntax2p(NiceTerm,[],lps2p,ExpandedTerm). 
 
-    :- volatile(tmp:module_dialect_lps/2).
-:- thread_local(tmp:module_dialect_lps/2).
+    :- volatile(tmp:module_dialect_lps/3).
+:- thread_local(tmp:module_dialect_lps/3).
 
 lps_term_expander(Module,NiceTerm,ExpandedTerm):- 
-  (current_prolog_flag(emulated_dialect,lps); (current_input(In),tmp:module_dialect_lps(In,Module)), 
+  (current_prolog_flag(emulated_dialect,lps) , (current_input(In),tmp:module_dialect_lps(In,Module,_Undos))), 
   % context_module(user), % LPS programs are in the user module
   lps_f_term_expansion(Module,NiceTerm,ExpandedTerm),!,
   maybe_inform(Module,NiceTerm,ExpandedTerm).
