@@ -1,15 +1,23 @@
 :- module(lps, []).
 
+calc_dialect_module(M):- 
+     '$current_typein_module'(TM), 
+     prolog_load_context(module,Load),strip_module(_,Strip,_),
+     context_module(Ctx),'$current_source_module'(SM),
+     ((TM\==Load,TM\==user) -> M = TM ; (M = SM)),
+     once(true;writeln([ti=TM,load=Load,strip=Strip,ctx=Ctx,sm=SM,lps=M])).     
 
-:- thread_local(tmp:m_dialect/1).
+
+   :- volatile(tmp:module_dialect_lps/2).
+:- thread_local(tmp:module_dialect_lps/2).
+
 :- system:module_transparent(lps:setup_dialect/0).
-setup_dialect :- 
-     '$current_typein_module'(M1), 
-     prolog_load_context(module,M2),strip_module(_,M3,_),
-     context_module(M4),'$current_source_module'(M5),
-     ((M1\==M2,M1\==user) -> M = M1 ; (M = M5)),
-     once(true;writeln([ti=M1,load=M2,strip=M3,ctx=M4,sm=M5,lps=M])),     
-     asserta(tmp:m_dialect(M)),
+
+setup_dialect :-
+     calc_dialect_module(M),
+     current_input(In),
+     ignore(retract(tmp:module_dialect_lps(In,_))),
+     asserta(tmp:module_dialect_lps(In,M)),
      op(900,fy,(M:not)), 
      op(1200,xfx,(M:then)),
      op(1185,fx,(M:if)),

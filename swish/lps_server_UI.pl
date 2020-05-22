@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-:- module(lps_server_UI, [ check_user_server_usage/0, lps_user_is_super/0, check_powerful_user/1, term_rendering//3]).
+:- module(lps_server_UI, [ check_user_server_usage/0, lps_user_is_super/0, user_is_known/0, check_powerful_user/1, term_rendering//3]).
 
 :- use_module(library(http/html_write)).
 :- use_module(library(http/term_html)).
@@ -75,9 +75,11 @@ tt:- threadutil:threads. % ...BUT STILL No permission to call sandboxed threadut
 
 
 % call this before every potentially dangerous operation:
-check_powerful_user(serve_ethereum) :- (allow_anonymous_powerful_ops -> true ; lps_user(User), User\=unknown_user ), !. %TODO: move out of open source
+check_powerful_user(serve_ethereum) :- user_is_known, !. %TODO: move out of open source
 check_powerful_user(_Op) :- (allow_anonymous_powerful_ops -> true ; lps_user_is_super), !.
 check_powerful_user(Op) :- throw(unsufficient_lps_user_privilege_for(Op)).
+
+user_is_known :- allow_anonymous_powerful_ops -> true ; lps_user(User), User\=unknown_user.
 
 % Extend this predicate to give some users all powers
 :- multifile lps_server_UI:super_user/1. % Make sure to include quotes in the user ids
@@ -89,6 +91,17 @@ any_call(G) :- check_powerful_user(sudo), G.
 sandbox:safe_primitive(lps_server_UI:any_call(G)) :- nonvar(G).
 
 user:sudo(G) :- any_call(G).
+
+% mechanism to load all Prolog files in the directory, to be used with care!
+consultFilesIn(Dir__) :- 
+	absolute_file_name(Dir__,Dir),
+	directory_files(Dir, Files), 
+	(sub_atom(Dir,_,1,0,'/') -> sub_atom(Dir,0,_,1,Dir_) ; Dir=Dir_),
+	forall((member(File,Files), file_name_extension(_,pl,File)),(
+		atomic_list_concat([Dir_,'/',File],F),
+		consult(F)
+	)).
+
 
 :- multifile prolog:message//1.
 prolog:message(unsufficient_lps_user_privilege_for(Op)) --> {lps_user(unknown_user), ! },

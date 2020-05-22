@@ -49,10 +49,10 @@ swish_config:config(include_alias,	system).
 :- use_module(library(settings)).
 
 % LPS visualizations will appear courtesy of either of two SWISH answer renderers:
-:- multifile('swish renderer'/2). % to avoid SWISH warnings in other files
-:- dynamic('swish renderer'/2). % to avoid SWISH warnings in other files
 :- use_module(lps_2d_renderer,[]). % need not and can not import the rendering predicate into here
 :- use_module(lps_timeline_renderer,[]).
+:- multifile(user:'swish renderer'/2). % to avoid SWISH warnings in other files
+:- dynamic(user:'swish renderer'/2). % to avoid SWISH warnings in other files
 :- use_rendering(lps_2d). % this will be the preferred... if available for the current visualization
 :- use_rendering(lps_timeline).
 :- use_rendering(graphviz). % for state/transition diagrams
@@ -309,16 +309,16 @@ my_swish_navbar(Options) -->
 	swish_page:swish_navbar(Options),!.
 	
 my_swish_resources -->
-	{google_analytics_script(JS)},
-	% swish_page:swish_css, swish_page:swish_js, 
-	% {http_absolute_location(lps_resources('lps.css'),LPScss,[])},
-	html_post(head, link([ type('text/css'),rel('stylesheet'),href('/lps/lps.css') ])),
-	html_post(head, script(JS)),
-	html_post(head, script([src('/lps/timeline.js')],[])),
-	html_post(head, script([src('/lps/2dWorld.js')],[])),
-	html_post(head, script([src('/lps/2dWorld_lazy.js')],[])).
+	{findall(R,extra_swish_resource(R),Resources)},
+	html_post_resources(Resources).
 
-	
+html_post_resources([R|Resources]) --> {!}, html_post(head, R), html_post_resources(Resources).
+html_post_resources([]) --> {true}.
+
+:- multifile user:extra_swish_resource/1. % declare a link or script resource to include in the SWISH page
+extra_swish_resource(link([ type('text/css'),rel('stylesheet'),href('/lps/lps.css') ])).
+extra_swish_resource(script(JS)) :- google_analytics_script(JS).
+
 
 % Stubs for system actions
 % Redundancy here with db.P:

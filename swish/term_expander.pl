@@ -12,7 +12,9 @@
 % we assume the LPS transform to preserve Prolog 
 lps_f_term_expansion(_Module,NiceTerm,'$source_location'(File, Line):ExpandedTerms) :- 
 	% somehow the source location is not being kept, causing later failure of clause_info/5 :-(	
-	prolog_load_context(source,File), prolog_load_context(term_position,TP), stream_position_data(line_position,TP,Line),
+	prolog_load_context(source,File), 
+        % atom_prefix(File,'pengine://'), % process only SWISH windows
+	prolog_load_context(term_position,TP), stream_position_data(line_position,TP,Line),
 	catch(call(call,lps_nlp_translate(NiceTerm,ExpandedTerms)),_,fail), !. % hook for LogicalContracts extension
 lps_f_term_expansion(_Module,NiceTerm,ExpandedTerm) :- 
 	may_clear_hints, set_top_term(NiceTerm),
@@ -21,15 +23,16 @@ lps_f_term_expansion(_Module,NiceTerm,ExpandedTerm) :-
 	% somehow this fails to... some terms;-) prolog_load_context(file,File), mylog(normal-File),
 	syntax2p(NiceTerm,[],lps2p,ExpandedTerm). 
 
-:- thread_local(tmp:m_dialect/1).
+    :- volatile(tmp:module_dialect_lps/2).
+:- thread_local(tmp:module_dialect_lps/2).
 
 lps_term_expander(Module,NiceTerm,ExpandedTerm):- 
-  current_prolog_flag(emulated_dialect,lps),
-  ( /*Module == user ;*/ (prolog_load_context(module,M), tmp:m_dialect(M))), % LPS programs are in the user module
-  lps_f_term_expansion(Module,NiceTerm,ExpandedTerm),
-  maybe_inform(M,Module,NiceTerm,ExpandedTerm).
+  (current_prolog_flag(emulated_dialect,lps); (current_input(In),tmp:module_dialect_lps(In,Module)), 
+  % context_module(user), % LPS programs are in the user module
+  lps_f_term_expansion(Module,NiceTerm,ExpandedTerm),!,
+  maybe_inform(Module,NiceTerm,ExpandedTerm).
   
-maybe_inform(_M,_Module,NiceTerm,ExpandedTerm):-   
+maybe_inform(_Module,NiceTerm,ExpandedTerm):-   
   ignore((fail,(NiceTerm\=@=ExpandedTerm,flush_output(user_error),
           format(user_error,'~N~p.~n',[NiceTerm-->ExpandedTerm]),
           flush_output(user_error)))).
@@ -38,5 +41,6 @@ maybe_inform(_M,_Module,NiceTerm,ExpandedTerm):-
 system:term_expansion(NiceTerm,ExpandedTerm):- 
   current_prolog_flag(emulated_dialect,lps),
   % compound(NiceTerm), NiceTerm \= (_:_), 
-  context_module(Module),
+  % context_module(Module),
+  prolog_load_context(module,Module),
   lps_term_expander(Module,NiceTerm,ExpandedTerm).
