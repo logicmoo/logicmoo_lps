@@ -3,6 +3,8 @@
 :- multifile(prolog:message/3).
 :- dynamic(prolog:message/3).
 
+:- use_module(library(lists)).
+
 %:- open('mylog.txt',write,S), assert(mylogFile(S)).
 
 %mylog_s(autoload).
@@ -61,7 +63,7 @@ sandbox:safe_primitive(user:mylog2(_M)).
 %:- asserta((prolog:message(A,_B,_C) :-  once(catch(mylog(A),_,true)), fail)).
 %:- asserta((prolog:message(A,_B,_C) :-  mylog(A), fail)).
 :- if( \+ clause(user:message_hook(A,_B,_C), (  mylog(A), fail))).
-:- asserta((user:message_hook(A,_B,_C) :-  mylog(A), fail)).
+%:- asserta((user:message_hook(A,_B,_C) :-  mylog(A), fail)).
 :- endif.
 
 :- if( \+ current_module(lps_server_UI) ).
