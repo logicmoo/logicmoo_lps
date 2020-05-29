@@ -40,32 +40,33 @@ expects_dialect/1:
 	user:goal_expansion/2,
 	user:file_search_path/2,
 	user:prolog_file_type/2,
-	lps_expansion/2.
+	lps_gOAL_expansion/2.
+	
 :- dynamic
 	user:goal_expansion/2,
 	user:file_search_path/2,
 	user:prolog_file_type/2.
 
-user:goal_expansion(In, Out) :-
-	prolog_load_context(dialect, lps),
-	lps_expansion(In, Out).
+:- notrace(interpreter:ensure_loaded(library('../engine/interpreter.P'))).
+:- notrace(user:use_module(library('../swish/term_expander.pl'))).
+:- notrace(lps_repl:ensure_loaded(library('../swish/user_module_repl.pl'))).
 
-%%	lps_expansion(+In, +Out)
+%%	lps_gOAL_expansion(+In, +Out)
 %
 %	goal_expansion rules to emulate LPS behaviour in SWI-Prolog. The
 %	expansions  below  maintain  optimization    from   compilation.
 %	Defining them as predicates would loose compilation.
 
-lps_expansion(expects_dialect(swi), pop_lps_dialect).
+lps_gOAL_expansion(expects_dialect(SWI), pop_lps_dialect):- swi == SWI, !.
 /*
-lps_expansion(eval_arith(Expr, Result),
+lps_gOAL_expansion(eval_arith(Expr, Result),
 	      Result is Expr).
 
-lps_expansion(if(Goal, Then),
+lps_gOAL_expansion(if(Goal, Then),
 	      (Goal *-> Then; true)).
-lps_expansion(if(Goal, Then, Else),
+lps_gOAL_expansion(if(Goal, Then, Else),
 	      (Goal *-> Then; Else)).
-lps_expansion(style_check(Style),
+lps_gOAL_expansion(style_check(Style),
 	      lps_style_check(Style)).
 
 */
@@ -253,7 +254,6 @@ prolog:message(lps_unsupported(Goal)) -->
 	[ 'LPS emulation (lps.pl): unsupported: ~p'-[Goal] ].
 
 
-
 calc_dialect_module(M):- 
      '$current_typein_module'(TM), 
      prolog_load_context(module,Load),strip_module(_,Strip,_),
@@ -268,9 +268,12 @@ calc_dialect_module(M):-
 :- system:module_transparent(lps:push_lps_dialect/0).
 :- system:module_transparent(lps:pop_lps_dialect/0).
 :- system:module_transparent(lps:setup_dialect/0).
-push_lps_dialect:- setup_dialect.
-setup_dialect :-
+setup_dialect :- push_lps_dialect,!.
+
+push_lps_dialect:-
    calc_dialect_module(M),
+   current_input(In),
+   style_check(-discontiguous), style_check(-singleton),
    push_operators([
      op(900,fy,(M:not)), 
      op(1200,xfx,(M:then)),
@@ -305,17 +308,28 @@ setup_dialect :-
      op(1050,fx,(M:(<-))),
 % -> is already defined as 1050, xfy, which will do given that lps.js does not support if-then-elses
      op(700,xfx,((M:(<=))))],Undo),
-   current_input(In),
    ignore(retract(tmp:module_dialect_lps(In,_,_))),     
    asserta(tmp:module_dialect_lps(In,M,Undo)),!.
 
-   %use_module(library('../engine/interpreter.P')),
-   %use_module(library('../swish/term_expander.pl')),!.
-
 
 pop_lps_dialect:-
-    current_input(In),
-    retract(tmp:module_dialect_lps(In,_WasM,Undo)),
+    current_input(StreamIn),
+    retract(tmp:module_dialect_lps(StreamIn,_WasM,Undo)),
     pop_operators(Undo).
+
+user:goal_expansion(In, Out) :-
+    prolog_load_context(dialect, lps),
+    lps_gOAL_expansion(In, Out).
+
+user:term_expansion(In, PosIn, Out, PosOut) :- In == end_of_file,
+   prolog_load_context(dialect, lps),
+   current_input(StreamIn),
+   tmp:module_dialect_lps(StreamIn,_WasM,_Undo),
+   pop_lps_dialect,!,
+   Out = In,
+   PosIn = PosOut.
+      
+
+
 
 
