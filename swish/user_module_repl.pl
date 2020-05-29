@@ -184,7 +184,7 @@ sd(G,AN) :- state_diagram(G,AN).
 sd(G) :- sd(G,[]).
 
 explore :- explore(_,[abstract_numbers,/*swish,*/dc,phb_limit(0.05)]).
-explore_numbers :- explore(_,[/*swish,*/dc,phb_limit(0.05)]).
+explore_numbers :- explore(_,[/*swish,*/ dc,phb_limit(0.05)]).
 	
 :- multifile user:file_search_path/2.
 user:file_search_path(lps_resources, lps_engine_dir('../swish/web')).
@@ -234,6 +234,8 @@ sandbox:safe_primitive(swish_highlight:show_mirror(_)).
 system_fluent(Fl) :- interpreter:system_fluent(Fl).
 
 % :- use_module(lps_server_UI).
+
+:- user:ensure_loaded(term_expander).
 
 :- endif.
 

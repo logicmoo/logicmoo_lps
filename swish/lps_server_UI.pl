@@ -224,6 +224,46 @@ lps_serve_manager(Request) :-
 		])
 	).
 
+
+:- http_handler('/lps_server/manager_d/', lps_serve_manager_debug, [prefix]). % .../lps_server/manager_d/lps1
+lps_serve_manager_debug(Request) :-
+   
+	lps_user(User,Email),
+	member(path_info(LPS_ID),Request),
+	ignore(background_execution(LPS_ID,RealTimeBeginning,MaxRealT,MaxCycles, MinCycleTime,FinalState,Status)), % user is checked here
+	get_time(Now), Elapsed is Now - RealTimeBeginning,
+	header_style(Style),
+	format(atom(LogURL),"/lps_server/log/~w",[LPS_ID]),
+	(Status==running ->
+		interpreter:get_rtb_fluent_event_templates(LPS_ID,Cycle,Beginning,Fluents,Events), % TODO: nicer failure reporting, please
+		format_time(atom(RTB),'%a, %d %b %Y %T %Z',Beginning),
+		(select(lps_terminate,Events,UserEvents) -> true; UserEvents=Events),
+		format(atom(SaveURL),"/lps_server/events/~w?events=[]&fluents=[lps_saved_state(_,_,_,_,_,_,_,_)]&after=true",[LPS_ID]),
+		format(atom(KillURL),"/lps_server/events/~w?events=[lps_terminate]",[LPS_ID]),
+		format(atom(SaveFinishURL),"/lps_server/events/~w?events=[lps_terminate]&fluents=[lps_saved_state(_,_,_,_,_,_,_,_)]&after=true",[LPS_ID]),
+		reply_html_page(title([LPS_ID,' manager']), [ % overkill, too many styles AND messes with simple scrolling: swish_page : \swish_css,
+			h2([Style],['LPS manager for ',LPS_ID]),
+			p("Hello ~w"-[User/Email]),
+			p([ "Status: ", b("~w"-[Status]), " Cycle: ~w"-[Cycle], " ", a([href=LogURL,target='_blank'],"See execution log") ]),
+			p("~1f seconds elapsed after ~s."-[Elapsed,RTB]),
+			p("maxRealTime ~w seconds, maxCycles ~w, cycle sleep ~w"-[MaxRealT,MaxCycles,MinCycleTime]),
+			h3('Fluents'), p('Please click to sample their state:'), ul(\fluentLinks(Fluents,LPS_ID)),
+			h3('Events'), \eventsForm(LPS_ID,UserEvents),
+			h3('Commands'),
+			p(a([href=SaveURL],'See snapshot of execution state')),
+			p(a([href=SaveFinishURL],'Save execution state and Kill')),
+			p(a([href=KillURL],'Kill'))
+		])
+		;
+		reply_html_page(title([LPS_ID,' manager']), [ % swish_page: \swish_css,
+			h2([Style],['LPS manager for ',LPS_ID]),
+			p(["Status: ~w"-[Status], ' (FINISHED) ', a([href=LogURL,target='_blank'],"See execution log")]),
+			p("~1f seconds elapsed."-[Elapsed]),
+			p("maxRealTime ~w seconds, maxCycles ~w, cycle sleep ~w"-[MaxRealT,MaxCycles,MinCycleTime]),
+			h2('Final state:'), p("~w"-[FinalState])
+		])
+	).
+
 header_style(style='padding: 7px; background-color: #317BB8; color: #FFFFFF; font-family:"Arial"').
 
 :- http_handler('/lps_server/log/', lps_serve_log, [prefix]). % .../lps_server/log/lps1
