@@ -19,6 +19,8 @@ golps(T,DFAgraph,Options) :-
 :- lps_term_expander:use_module(library('../swish/term_expander')).
    
 
+
+
 :- if(current_module(swish)).
 :- user:ensure_loaded('../swish/user_module_file').
 :- else.

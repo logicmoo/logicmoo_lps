@@ -152,11 +152,11 @@ must_lps_program_module(M):- lps_program_module(M)*->true;throw(missing(lps_prog
 	my_load_dyn/2,
 	head_hint/3]).
 
-uassert(X) :- assert(db:X). 
-uasserta(X) :- asserta(db:X).
-uassertz(X) :- assertz(db:X).
-uretractall(X) :- retractall(db:X).
-uretract(X) :- retract(db:X).
+uassert(X) :- must_lps_program_module(DB),assert(DB:X). 
+uasserta(X) :- must_lps_program_module(DB),asserta(DB:X).
+uassertz(X) :- must_lps_program_module(DB),assertz(DB:X).
+uretractall(X) :- must_lps_program_module(DB),retractall(DB:X).
+uretract(X) :- must_lps_program_module(DB),retract(DB:X).
 u_user_predicate(X) :- functor(X,F,N),must_lps_program_module(DB),current_predicate(DB:F/N).
 
 callprolog(G) :- predicate_property(G,built_in), !, call(G). 
@@ -3145,8 +3145,10 @@ reduce_step() :-
     uretractall(steps(C)),
     uassertz(steps(NC)).
 
-% holds_all(+PL). True if all predicates in PL hold in the augmented
-% state {S*_i, ev*_i, L_int, L_timeless}.
+%! holds_all(+PL). 
+%
+%    True if all predicates in PL hold in the augmented
+%    state {S*_i, ev*_i, L_int, L_timeless}.
 holds_all(PL) :- evaluate(PL).
 
 % same but first binding time variables; notice that d_pre conditions have time variables already bound into a single interval
@@ -3156,8 +3158,9 @@ holds_all(PL,Current,Next) :-
 	(member(happens(_,Current,Next),PL) -> true ; once(member(holds(_,Next),PL))),
 	holds_all(PL).
 
-% query(+P). True if P holds in the augmented state {S*_i, ev*_i, L_int,
-% L_timeless}.
+%! query(+P). 
+%
+%               True if P holds in the augmented state {S*_i, ev*_i, L_int, L_timeless}.
 %
 
 query(L) :- option(dc), !, dc_query(L).
@@ -3202,7 +3205,7 @@ evaluate([P|Rest]) :- !, query(P), evaluate(Rest).
 evaluate((P,Rest)) :- query(P), evaluate(Rest).
 
 
-% fluent_pred(+Fl)
+%! fluent_pred(+Fl)
 %   True if Fl is a fluent predicate symbol.
 %
 fluent_pred(Fl) :-
@@ -3219,7 +3222,7 @@ fluent_pred(not(Fl)) :-
     l_int(holds(Fl, _), _).
 
 
-% event_pred(+Ev)
+%! event_pred(+Ev)
 %   True if Ev is an event predicate symbol.
 %
 event_pred(Ev) :-
@@ -3252,7 +3255,7 @@ reactive_conjunct(tc(T)) :- !, % TODO: relax or revise
 reactive_conjunct(X) :- u_user_predicate(X).
 
 
-% l_int_body(+P)
+%! l_int_body(+P)
 %
 l_int_body(holds(Fl,_)) :- var(Fl), !.
 l_int_body(holds(findall(_T,G,_L), _)) :- !,
@@ -3265,7 +3268,7 @@ l_int_body(P) :-
     l_timeless(PP, _), !.
 l_int_body(P) :- u_user_predicate(P).
 
-% l_events_body(+P)
+%! l_events_body(+P)
 %
 l_events_body(holds(P, _)) :- var(P), !.
 l_events_body(holds(P, _)) :- !,
