@@ -30,6 +30,7 @@ expects_dialect/1:
 */
 
 :- module(lps, [pop_lps_dialect/0,push_lps_dialect/0]).
+:- asserta(swish:is_a_module).
 
 
 		 /*******************************
@@ -50,6 +51,8 @@ expects_dialect/1:
 :- notrace(interpreter:ensure_loaded(library('../engine/interpreter.P'))).
 :- notrace(user:use_module(library('../swish/term_expander.pl'))).
 :- notrace(lps_repl:ensure_loaded(library(lps_corner))).
+:- notrace(system:ensure_loaded(library(operators))).
+:- notrace(system:ensure_loaded(library(broadcast))).
 
 
 lps_debug(_).
@@ -133,7 +136,8 @@ calc_dialect_module(M):-
      '$current_typein_module'(TM), 
      prolog_load_context(module,Load),strip_module(_,Strip,_),
      context_module(Ctx),'$current_source_module'(SM),
-     ((TM\==Load,TM\==user) -> M = TM ; (M = SM)),
+     ((SM==Load,SM\==user)-> M = SM ;
+     ((TM\==Load,TM\==user) -> M = TM ; (M = SM))),
      lps_debug([ti=TM,load=Load,strip=Strip,ctx=Ctx,sm=SM,lps=M]).     
 
 
@@ -145,11 +149,12 @@ calc_dialect_module(M):-
 :- system:module_transparent(lps:push_lps_dialect/0).
 :- system:module_transparent(lps:push_lps_dialect/2).
 
-setup_dialect:- notrace(push_lps_dialect)->true;(trace,push_lps_dialect).
+setup_dialect:- (push_lps_dialect)->true;(trace,push_lps_dialect).
 
 % get_lps_alt_user_module( user, db):-!.
-get_lps_alt_user_module( User,LPS_USER):- is_lps_alt_user_module(User,LPS_USER),!.
 get_lps_alt_user_module(_User,LPS_USER):- interpreter:lps_program_module(LPS_USER),!.
+get_lps_alt_user_module( User,LPS_USER):- is_lps_alt_user_module(User,LPS_USER),!.
+%get_lps_alt_user_module(_User,LPS_USER):- interpreter:lps_program_module(LPS_USER),!.
 
 % is_lps_alt_user_module(user,db):-!.
 is_lps_alt_user_module(_User,Out):- gensym(lps, Out).
@@ -169,8 +174,11 @@ push_lps_dialect(User, User):-
   '$set_source_module'(LPS_USER),!,
   push_lps_dialect(User, LPS_USER).
 
+
 push_lps_dialect(Was, M):-
    interpreter:check_lps_program_module(M),
+   multifile(M:actions/1),
+   dynamic(M:actions/1),
    current_input(In),
    style_check(-discontiguous), style_check(-singleton),
    push_operators([

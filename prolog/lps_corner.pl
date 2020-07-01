@@ -1,5 +1,7 @@
 :- module(lps_corner,[golps/1,golps/3]).
+:- asserta(swish:is_a_module).
 
+%:- system:use_module(library('../engine/db.P')).
 :- module_transparent(golps/1).
 :- module_transparent(golps/3).
 
@@ -17,6 +19,7 @@ golps(T,DFAgraph,Options) :-
 :- user:ensure_loaded(library(dialect/lps)).
 :- interpreter:use_module(library('../engine/interpreter.P')).
 :- lps_term_expander:use_module(library('../swish/term_expander')).
+:- visualizer:use_module(library('../utils/visualizer.P')).
    
 
 

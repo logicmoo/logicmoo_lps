@@ -26,6 +26,8 @@
 	file_generator_name/2, may_clear_hints/0,term_colours/2,timeless_ref/1, set_top_term/1, dumploaded/2
 	]).
 
+%:- meta_predicate dumploaded(0,*).
+
 :- if(\+ current_prolog_flag(dialect, swi)).
 :- writeln("LPS requires SWI-Prolog"), throw(swi_prolog_required).
 :- endif.

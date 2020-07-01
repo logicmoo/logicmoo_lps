@@ -55,6 +55,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 % This fact will contain this file's directory; its presence also denotes "LPS running"
 :- dynamic lps_engine_directory/1.
 
+:- meta_predicate cycle(*,*,0,*).
+:- meta_predicate findall_variants(?,0,-).
+:- meta_predicate has_no_future(*,*,0).
+:- meta_predicate time_limited(*,0,*).
+
+:- meta_predicate qcatch_f(0).
+:- meta_predicate qcatch_t(0).
+:- meta_predicate qcatch(0,?,0).
+
 :- if(\+ current_prolog_flag(dialect, swi)).
 :- writeln("LPS requires SWI-Prolog"), throw(swi_prolog_required).
 :- endif.
@@ -70,62 +79,84 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 % If performance becomes bad (due to nonindexed access inside the pengine_self predicate) we should pass M as arg
 % Implementation note: execution specific states (cf. cleanup_engine) might be stored instead by simply using thread_local declarations
 
-d(X,Props) :- must_lps_program_module(M), catch(M:d(X,Props),_,fail).
-action(X) :- must_lps_program_module(M), catch(M:action(X),_,fail).
+:- module_transparent(qcatch/3).
+qcatch(G,E,F):-  tracing -> 
+  setup_call_cleanup(('$leash'(OldL, OldL),leash(-exception),notrace),
+    catch(G,E,true),
+    ('$leash'(_, OldL),trace,call(F))) 
+  ; catch(G,E,F).
+
+:- module_transparent(qcatch_f/1).
+qcatch_f(G):-  tracing -> 
+  setup_call_cleanup(('$leash'(OldL, OldL),leash(-exception),notrace),
+    catch(G,_,notrace(fail)),
+    ('$leash'(_, OldL),trace)) 
+  ; catch(G,_,fail).
+
+:- module_transparent(qcatch_f/1).
+qcatch_t(G):-  tracing -> 
+  setup_call_cleanup(('$leash'(OldL, OldL),leash(-exception),notrace),
+    catch(G,_,notrace(true)),
+    ('$leash'(_, OldL),trace)) 
+  ; catch(G,_,true).
+  
+
+d(X,Props) :- must_lps_program_module(M), qcatch_f(M:d(X,Props)).
+action(X) :- must_lps_program_module(M), qcatch_f(M:action(X)).
 current_goal(X) :- must_lps_program_module(M), M:current_goal(X).
 current_time(X) :- must_lps_program_module(M), M:current_time(X).
 real_time_beginning(X) :- must_lps_program_module(M), M:real_time_beginning(X).
-lps_updating_current_state :- must_lps_program_module(M), catch(M:lps_updating_current_state,_,fail).
-d_pre(X) :- must_lps_program_module(M), catch(M:d_pre(X),_,fail).
-depth(X) :- must_lps_program_module(M), catch(M:depth(X),_,fail).
-event(X) :- must_lps_program_module(M), catch(M:event(X),_,fail).
-fluent(X) :- must_lps_program_module(M), catch(M:fluent(X),_,fail).
-happens(X,Y,Z) :- must_lps_program_module(M), catch(M:happens(X,Y,Z),_,fail).
-initial_state(X) :- must_lps_program_module(M), catch(M:initial_state(X),_,fail).
-initiated(X,Y,Z) :- must_lps_program_module(M), catch(M:initiated(X,Y,Z),_,fail).
-l_events(X,Y) :- must_lps_program_module(M), catch(M:l_events(X,Y),_,fail).
-l_int(X,Y) :- must_lps_program_module(M), catch(M:l_int(X,Y),_,fail).
-l_timeless(X,Y) :- must_lps_program_module(M), catch(M:l_timeless(X,Y),_,fail).
-maxTime(X) :- must_lps_program_module(M), catch(M:maxTime(X),_,fail). % LPS execution/simulation cycles
-maxRealTime(X) :- must_lps_program_module(M), catch(M:maxRealTime(X),_,fail). % real time (seconds, float)
-minCycleTime(X) :- must_lps_program_module(M), catch(M:minCycleTime(X),_,fail). % real time (seconds, float); AVOID in non-background SWISH!
-simulatedRealTimePerCycle(X) :- must_lps_program_module(M), catch(M:simulatedRealTimePerCycle(X),_,fail). % (seconds)
-simulatedRealTimeBeginning(X) :- must_lps_program_module(M), catch(M:simulatedRealTimeBeginning(X),_,fail). % date expression atom, cf. http://www.swi-prolog.org/pldoc/man?predicate=parse_time/3
-observe(X,Y) :- must_lps_program_module(M), catch(M:observe(X,Y),_,fail).
+lps_updating_current_state :- must_lps_program_module(M), qcatch_f(M:lps_updating_current_state).
+d_pre(X) :- must_lps_program_module(M), qcatch_f(M:d_pre(X)).
+depth(X) :- must_lps_program_module(M), qcatch_f(M:depth(X)).
+event(X) :- must_lps_program_module(M), qcatch_f(M:event(X)).
+fluent(X) :- must_lps_program_module(M), qcatch_f(M:fluent(X)).
+happens(X,Y,Z) :- must_lps_program_module(M), qcatch_f(M:happens(X,Y,Z)).
+initial_state(X) :- must_lps_program_module(M), qcatch_f(M:initial_state(X)).
+initiated(X,Y,Z) :- must_lps_program_module(M), qcatch_f(M:initiated(X,Y,Z)).
+l_events(X,Y) :- must_lps_program_module(M), qcatch_f(M:l_events(X,Y)).
+l_int(X,Y) :- must_lps_program_module(M), qcatch_f(M:l_int(X,Y)).
+l_timeless(X,Y) :- must_lps_program_module(M), qcatch_f(M:l_timeless(X,Y)).
+maxTime(X) :- must_lps_program_module(M), qcatch_f(M:maxTime(X)). % LPS execution/simulation cycles
+maxRealTime(X) :- must_lps_program_module(M), qcatch_f(M:maxRealTime(X)). % real time (seconds, float)
+minCycleTime(X) :- must_lps_program_module(M), qcatch_f(M:minCycleTime(X)). % real time (seconds, float); AVOID in non-background SWISH!
+simulatedRealTimePerCycle(X) :- must_lps_program_module(M), qcatch_f(M:simulatedRealTimePerCycle(X)). % (seconds)
+simulatedRealTimeBeginning(X) :- must_lps_program_module(M), qcatch_f(M:simulatedRealTimeBeginning(X)). % date expression atom, cf. http://www.swi-prolog.org/pldoc/man?predicate=parse_time/3
+observe(X,Y) :- must_lps_program_module(M), qcatch_f(M:observe(X,Y)).
 % TODO: interference with SWI ???
-option(X) :- must_lps_program_module(M), catch(M:option(X),_,fail).
-reactive_rule(X,Y) :- must_lps_program_module(M), catch(M:reactive_rule(X,Y),_,fail).
-reactive_rule(X,Y,Z) :- must_lps_program_module(M), catch(M:reactive_rule(X,Y,Z),_,fail).
-state(X) :- must_lps_program_module(M), catch(M:state(X),_,fail).
-next_state(X) :- must_lps_program_module(M), catch(M:next_state(X),_,fail).
+option(X) :- must_lps_program_module(M), qcatch_f(M:option(X)).
+reactive_rule(X,Y) :- must_lps_program_module(M), qcatch_f(M:reactive_rule(X,Y)).
+reactive_rule(X,Y,Z) :- must_lps_program_module(M), qcatch_f(M:reactive_rule(X,Y,Z)).
+state(X) :- must_lps_program_module(M), qcatch_f(M:state(X)).
+next_state(X) :- must_lps_program_module(M), qcatch_f(M:next_state(X)).
 steps(X) :- must_lps_program_module(M), M:steps(X).
-terminated(X,Y,Z) :- must_lps_program_module(M), catch(M:terminated(X,Y,Z),_,fail).
-tried(X,Y,Z) :- must_lps_program_module(M), catch(M:tried(X,Y,Z),_,fail).
-updated(A,B,C,D) :- must_lps_program_module(M), catch(M:updated(A,B,C,D),_,fail).
-used(X) :- must_lps_program_module(M), catch(M:used(X),_,fail).
-lps_test_options(X) :- must_lps_program_module(M), catch(M:lps_test_options(X),_,fail).
-lps_test_result_item(X,Y,Z) :- must_lps_program_module(M), catch(M:lps_test_result_item(X,Y,Z),_,fail).
-lps_test_action_ancestor(X,Y,Z) :- must_lps_program_module(M), catch(M:lps_test_action_ancestor(X,Y,Z),_,fail).
-lps_test_result(X,Y,Z) :- must_lps_program_module(M), catch(M:lps_test_result(X,Y,Z),_,fail).
-lps_failed_test(X,Y) :- must_lps_program_module(M), catch(M:lps_failed_test(X,Y),_,fail).
-lps_saved_state(A,B,C,D,E,F,G,H) :- must_lps_program_module(M), catch(M:lps_saved_state(A,B,C,D,E,F,G,H),_,fail).
-events(X) :- must_lps_program_module(M), catch(M:events(X),_,fail).
-prolog_events(X) :- must_lps_program_module(M), catch(M:prolog_events(X),_,fail).
-fluents(X) :- must_lps_program_module(M), catch(M:fluents(X),_,fail).
-actions(X) :- must_lps_program_module(M), catch(M:actions(X),_,fail).
-unserializable(X) :- must_lps_program_module(M), catch(M:unserializable(X),_,fail).
+terminated(X,Y,Z) :- must_lps_program_module(M), qcatch_f(M:terminated(X,Y,Z)).
+tried(X,Y,Z) :- must_lps_program_module(M), qcatch_f(M:tried(X,Y,Z)).
+updated(A,B,C,D) :- must_lps_program_module(M), qcatch_f(M:updated(A,B,C,D)).
+used(X) :- must_lps_program_module(M), qcatch_f(M:used(X)).
+lps_test_options(X) :- must_lps_program_module(M), qcatch_f(M:lps_test_options(X)).
+lps_test_result_item(X,Y,Z) :- must_lps_program_module(M), qcatch_f(M:lps_test_result_item(X,Y,Z)).
+lps_test_action_ancestor(X,Y,Z) :- must_lps_program_module(M), qcatch_f(M:lps_test_action_ancestor(X,Y,Z)).
+lps_test_result(X,Y,Z) :- must_lps_program_module(M), qcatch_f(M:lps_test_result(X,Y,Z)).
+lps_failed_test(X,Y) :- must_lps_program_module(M), qcatch_f(M:lps_failed_test(X,Y)).
+lps_saved_state(A,B,C,D,E,F,G,H) :- must_lps_program_module(M), qcatch_f(M:lps_saved_state(A,B,C,D,E,F,G,H)).
+events(X) :- must_lps_program_module(M), qcatch_f(M:events(X)).
+prolog_events(X) :- must_lps_program_module(M), qcatch_f(M:prolog_events(X)).
+fluents(X) :- must_lps_program_module(M), qcatch_f(M:fluents(X)).
+actions(X) :- must_lps_program_module(M), qcatch_f(M:actions(X)).
+unserializable(X) :- must_lps_program_module(M), qcatch_f(M:unserializable(X)).
 
 my_load_dyn(X,Y) :- must_lps_program_module(DB),DB:my_load_dyn(X,Y).
 
-uassert(X) :- must_lps_program_module(M), catch(assert(M:X),_,true). 
-uasserta(X) :- must_lps_program_module(M), catch(asserta(M:X),_,true). 
-uassertz(X) :- must_lps_program_module(M), catch(assertz(M:X),_,true).
-uretractall(X) :- ignore((lps_program_module(M), catch(retractall(M:X),_,true))).
+uassert(X) :- must_lps_program_module(M), qcatch_t(assert(M:X)). 
+uasserta(X) :- must_lps_program_module(M), qcatch_t(asserta(M:X)). 
+uassertz(X) :- must_lps_program_module(M), qcatch_t(assertz(M:X)).
+uretractall(X) :- ignore((lps_program_module(M), qcatch_t(retractall(M:X)))).
 % uretractall(X) :- must_lps_program_module(M), retractall(M:X).
 uretract(X) :- must_lps_program_module(M), retract(M:X).
 u_user_predicate(X) :- functor(X,F,N),  must_lps_program_module(M), current_predicate(M:F/N).
-%callprolog(G) :- predicate_property(G,built_in), !, catch(G,E,(print_error(callprolog,E),fail)). 
-%callprolog(G) :- must_lps_program_module(M), catch(call(M:G),E,(print_error(callprolog,E),fail)).
+%callprolog(G) :- predicate_property(G,built_in), !, qcatch_f(G,E,(print_error(callprolog,E),fail)). 
+%callprolog(G) :- must_lps_program_module(M), qcatch_f(call(M:G),E,(print_error(callprolog,E),fail)).
 % no reason to call outside M...! callprolog(G) :- predicate_property(G,built_in), !, call(G). 
 callprolog(G) :- must_lps_program_module(M), call(M:G).
 
@@ -134,7 +165,7 @@ u_swiclause(H,B,Ref) :- must_lps_program_module(M), clause(M:H,B,Ref).
 
 :- endif.
 
-must_lps_program_module(M):- lps_program_module(M)*->true;throw(missing(lps_program_module/1)).
+must_lps_program_module(M):- lps_program_module(M)*->true;(ignore(M=db),nop(throw(missing(lps_program_module/1)))).
 
 :- if(\+ current_module(swish)).
 % Now support for vanilla SWI Prolog
@@ -161,8 +192,8 @@ u_user_predicate(X) :- functor(X,F,N),must_lps_program_module(DB),current_predic
 
 callprolog(G) :- predicate_property(G,built_in), !, call(G). 
 callprolog(G) :- must_lps_program_module(DB),call(DB:G).
-%callprolog(G) :- predicate_property(G,built_in), !, catch(G,E,(print_error(callprolog,E),fail)). 
-%callprolog(G) :- catch(db:G,E,(print_error(callprolog,E),fail)).
+%callprolog(G) :- predicate_property(G,built_in), !, qcatch_f(G,E,(print_error(callprolog,E),fail)). 
+%callprolog(G) :- qcatch_f(db:G,E,(print_error(callprolog,E),fail)).
 
 u_swiclause(H,B,Ref) :- must_lps_program_module(DB),clause(DB:H,B,Ref).
 
@@ -174,7 +205,7 @@ u_swiclause(H,B,Ref) :- must_lps_program_module(DB),clause(DB:H,B,Ref).
 :- thread_local(lps_program_module/1). 
 
 % necessary to call at the beginning of any user goal from SWISH that interacts with the LPS program
-check_lps_program_swish_module(M) :- notrace(catch(pengine_self(M),_,fail)), !, 
+check_lps_program_swish_module(M) :- notrace(qcatch_f(pengine_self(M))), !, 
 	check_lps_program_module(M), 
 	(\+ option(swish) -> uassert(option(swish)); true). % hack to keep swish presence testing simple on this end
 check_lps_program_swish_module(_).
@@ -256,7 +287,7 @@ print_syntax_error(Type,Message,Position) :-
 	). 
 
 print_error(Type,Message,Position) :- option(swish), option(background(_)), !, % avoid disturbing SWISH's textual output
-	catch( call(call,http_log('lps ~w: ~w ~w', [Type,Message,Position])),_,true),
+	qcatch_t( call(call,http_log('lps ~w: ~w ~w', [Type,Message,Position]))),
 	do_write([Type,':',Message,' ',Position]).
 print_error(Type,Message,Position) :- 
 	print_message(Type,lps_error(Message,Position)). % SWI's universal messaging pipeline
@@ -1012,9 +1043,9 @@ lps_program_clause_file(Pred,Body,File) :-
 	must_lps_program_module(M),
 	M:current_predicate(F/A), functor(Pred,F,A), \+ predicate_property(Pred,built_in), 
 	\+ exclude_from_user_program(Pred), 
-	% the following (weird) catch is because in backgound programs sometimes we would get a..
+	% the following (weird) qcatch_f is because in backgound programs sometimes we would get a..
 	% exception(error(permission_error(access,private_procedure,read_util:read_line_to_codes/2),context(system:clause/3,_4882))) 
-	catch(clause(M:Pred,Body,Ref),_,fail), 
+	qcatch_f(clause(M:Pred,Body,Ref)), 
 	(prolog_clause:clause_info(Ref, File, _TermPos, _VarOffsets, _) -> true ; File=asserted),
 	File \== asserted,
 	\+ excluded_file(File).
@@ -1099,7 +1130,7 @@ go :- go(_,[swish]). % makes sense only on swish
 go(File, OptionsList) :- go(File, OptionsList,[]).
 
 
-in_pengines_frame:- notrace(catch(in_pengines,_,true)).   % Logicmoo specific predicate
+in_pengines_frame:- notrace(qcatch_t(in_pengines)).   % Logicmoo specific predicate
 
 /** 
 	go(+File, ?OptionsList, ?ResultFluents)  is det 
@@ -1145,7 +1176,7 @@ go(File, OptionsList_, ResultFluents) :-
 		lps_user(User,Email), % this is NOT available in the new thread, so we get it now
 		thread_create((
 			assert(background_execution(User,ID,0,0,0,0,[])),
-			catch(set_server_log(ID,User,Email),Ex,print_message(warning,"Could not prepare LPS log"-Ex)), 
+			qcatch_f(set_server_log(ID,User,Email),Ex,print_message(warning,"Could not prepare LPS log"-Ex)), 
 			% May copy SWISH's dynamic user module into our thread's db module:
 			(nonvar(Self) -> % under SWISH
 				asserta((lps_program_module(DB) :- !)), db:copy_from_module(Self)
@@ -1565,7 +1596,7 @@ check_syntax(F,Notices) :-
 buildError(BadSubterm,Vars,Message,NoticeSubterm) :-
 	copy_term(BadSubterm+Vars,BadSubterm_+Vars_),
 	buildError(BadSubterm_,Vars_,Vars,Message,NoticeSubterm).
-buildError(X,Vars_,Vars,M,subterm(X,MM)) :- catch(psyntax:syntax2p_literal(NicerTerm,[],lps2p,_,_,_,X),_,fail), !, 
+buildError(X,Vars_,Vars,M,subterm(X,MM)) :- qcatch_f(psyntax:syntax2p_literal(NicerTerm,[],lps2p,_,_,_,X)), !, 
 	Vars=Vars_, bindAllVars(Vars),
 	concat_terms([NicerTerm,M],MM). % should probably use SWI's term_string and make sure M quotes do not make it to the output
 buildError(X,Vars,Vars,M,subterm(X,MM)) :- bindAllVars(Vars), concat_terms([X,M],MM).
@@ -1586,7 +1617,7 @@ bindAllVars_([],_NameValuePairs).
 
 % May call an external predicate hook to find the position
 % position for Prolog Studio is t(CharPosition,TermIndex), for SWI / swish see lps_source_position/4 above
-source_position(Term,F,Position,Vars) :- catch(lps_source_position(Term,F,Position,Vars),_,fail), !.
+source_position(Term,F,Position,Vars) :- qcatch_f(lps_source_position(Term,F,Position,Vars)), !.
 source_position(_,_,unknown,[]).
 	
 % fails if errors occur:
@@ -1668,7 +1699,7 @@ check_fluent_change_vars(_Old-New,Fl, Pos, Vars,[notice(error,ET,Pos)]) :-
 load_check_syntax(File,Notices) :-
 	cleanup_program,
 	% Let's assume Prolog syntactic errors are reported elsewhere:
-	catch(my_load_dyn(File),_E,true), 
+	qcatch_f(my_load_dyn(File),_E,true), 
 	check_syntax(File,Notices).
 
 assert_state_list([H|T]) :- system_fluent(H), !,
@@ -1900,7 +1931,7 @@ load_test_file_for(F) :-
 	test_filename(F,TF),
 	 %  try source of F does not exist:    TODO: fix this circular dependency of psyntax
 	(file_exists(TF) -> TF=TF_ ; psyntax:file_generator_name(F,GF), test_filename(GF,TF_), file_exists(TF_)),
-	catch(my_load_dyn(TF_,false),E,true),
+	qcatch(my_load_dyn(TF_,false),E,true),
 	(nonvar(E) -> 
 		write(user_error, 'ERROR: could not load test file '), writeln(user_error,TF), writeln(user_error,E),
 		writeln(user_error,' To obtain a test file you need to execute your program with the make_test option: go(YourFile,[make_test])'),
@@ -1955,7 +1986,7 @@ test_filename(PF,TF) :-
 	expand_filename(PF,Path),
 	concat_atom([Path,'.lpst'],TF).
 
-lps_postmortem_filename(TF) :- catch(user:lps_postmortem_filename(TF),_,fail).
+lps_postmortem_filename(TF) :- qcatch_f(user:lps_postmortem_filename(TF)).
 
 % loads the "test file" / postmortem trace from the standard file location
 check_load_postmortem :- (lps_test_result_item(_,_,_);lps_test_result(_,_,_);lps_test_action_ancestor(_,_,_);lps_test_options(_)), !.
@@ -2355,7 +2386,7 @@ updateEvents(Time, Next, Ri, Gi, ExternalObservations, ToReturn) :-
 	findall(E,(observe(Evs, Next),member(E, Evs) ; member(E,ExternalObservations)),Observations),
 	state(real_time(Now)),
 	findall(E,( 
-		catch(observe(Evs, RT),_,fail), 
+		qcatch_f(observe(Evs, RT)), 
 		misc_to_realtime(RT,RTseconds), RTseconds =< Now, 
 		% make sure real time moments do not repeat in different cycles:
 		\+ (observed_at(RTseconds,T), T\=Time), 
@@ -2754,7 +2785,7 @@ system_fluent(lps_user(UserID,Email),lps_user(UserID,Email)).
 lps_user(User) :- lps_user(User,_Email).
 
 % Currently this is valid for SWISH only
-lps_user(User,Email) :- catch(call(call,user:lps_user(User,Email)),_,fail), !.
+lps_user(User,Email) :- qcatch_f(call(call,user:lps_user(User,Email))), !.
 lps_user(unknown_user,unknown_email).
 
 % for introspection only:
@@ -3139,6 +3170,7 @@ next_time :-
 	uassertz(steps(1000))
 	).
 
+%:- trace.
 reduce_step() :-
     steps(C),
     NC is C-1,

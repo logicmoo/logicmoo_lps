@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 fluents left(_Position), right(_Position), searching(_Content).

@@ -35,6 +35,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 :- module(lps_server_UI, [ check_user_server_usage/0, lps_user_is_super/0, user_is_known/0, check_powerful_user/1, term_rendering//3]).
 
+ :- meta_predicate any_call(0).
+
 :- use_module(library(http/html_write)).
 :- use_module(library(http/term_html)).
 :- use_module(library(http/js_write)).
@@ -90,6 +92,7 @@ any_call(G) :- check_powerful_user(sudo), G.
 
 sandbox:safe_primitive(lps_server_UI:any_call(G)) :- nonvar(G).
 
+:- meta_predicate user:sudo(0).
 user:sudo(G) :- any_call(G).
 
 % mechanism to load all Prolog files in the directory, to be used with care!

@@ -15,7 +15,7 @@ lps_f_term_expansion(_Module,NiceTerm,'$source_location'(File, Line):ExpandedTer
 	prolog_load_context(source,File), 
         % atom_prefix(File,'pengine://'), % process only SWISH windows
 	prolog_load_context(term_position,TP), stream_position_data(line_position,TP,Line),
-	catch(call(call,lps_nlp_translate(NiceTerm,ExpandedTerms)),_,fail), !. % hook for LogicalContracts extension
+	notrace(catch(call(call,lps_nlp_translate(NiceTerm,ExpandedTerms)),_,fail)), !. % hook for LogicalContracts extension
 lps_f_term_expansion(_Module,NiceTerm,ExpandedTerm) :- 
 	may_clear_hints, set_top_term(NiceTerm),
 	% current_syntax(lps2p,true), In the future we may want to support other syntax conversions
