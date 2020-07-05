@@ -43,7 +43,7 @@ swish_config:config(include_alias,	system).
 :- endif.
 
 :- use_module(swish(lib/render)).
-:- use_module(library(http/http_dispatch)).
+:- use_module(library(http/http_dispatch)). % ,except([extend/3])).
 :- use_module(swish(lib/plugin/login)).
 :- use_module(swish(lib/authenticate)).
 :- use_module(library(settings)).
