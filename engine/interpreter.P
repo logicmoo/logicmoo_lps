@@ -193,7 +193,7 @@ u_user_predicate(X) :- functor(X,F,N),must_lps_program_module(DB),current_predic
 callprolog(G) :- predicate_property(G,built_in), !, call(G). 
 callprolog(G) :- must_lps_program_module(DB),call(DB:G).
 %callprolog(G) :- predicate_property(G,built_in), !, qcatch_f(G,E,(print_error(callprolog,E),fail)). 
-%callprolog(G) :- qcatch_f(db:G,E,(print_error(callprolog,E),fail)).
+%callprolog(G) :- qcatch(db:G,E,(print_error(callprolog,E),fail)).
 
 u_swiclause(H,B,Ref) :- must_lps_program_module(DB),clause(DB:H,B,Ref).
 
@@ -1176,7 +1176,7 @@ go(File, OptionsList_, ResultFluents) :-
 		lps_user(User,Email), % this is NOT available in the new thread, so we get it now
 		thread_create((
 			assert(background_execution(User,ID,0,0,0,0,[])),
-			qcatch_f(set_server_log(ID,User,Email),Ex,print_message(warning,"Could not prepare LPS log"-Ex)), 
+			qcatch(set_server_log(ID,User,Email),Ex,print_message(warning,"Could not prepare LPS log"-Ex)), 
 			% May copy SWISH's dynamic user module into our thread's db module:
 			(nonvar(Self) -> % under SWISH
 				asserta((lps_program_module(DB) :- !)), db:copy_from_module(Self)
@@ -1621,6 +1621,7 @@ source_position(Term,F,Position,Vars) :- qcatch_f(lps_source_position(Term,F,Pos
 source_position(_,_,unknown,[]).
 	
 % fails if errors occur:
+print_errors(_File) :- !.
 print_errors(File) :- 
 	check_syntax(File,Notices),
 	(option(background(_)) -> % can't print from background threads
@@ -1699,7 +1700,7 @@ check_fluent_change_vars(_Old-New,Fl, Pos, Vars,[notice(error,ET,Pos)]) :-
 load_check_syntax(File,Notices) :-
 	cleanup_program,
 	% Let's assume Prolog syntactic errors are reported elsewhere:
-	qcatch_f(my_load_dyn(File),_E,true), 
+	qcatch(my_load_dyn(File),_E,true), 
 	check_syntax(File,Notices).
 
 assert_state_list([H|T]) :- system_fluent(H), !,

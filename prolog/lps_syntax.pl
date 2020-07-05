@@ -4,7 +4,7 @@
      op(900,fy,(not)), 
      op(1200,xfx,(then)),
      op(1185,fx,(if)),
-     op(1200,xfx,(if)),
+     op(1190,xfx,(if)),
      op(1100,xfy,else), 
      op(1050,xfx,(terminates)),
      op(1050,xfx,(initiates)),
@@ -42,7 +42,7 @@
 :- op(900,fy,(not)). 
 :- op(1200,xfx,(then)).
 :- op(1185,fx,(if)).
-:- op(1200,xfx,(if)).
+:- op(1190,xfx,(if)).
 % the following is for "conditional expressions", (if C then T else E)
 % this maybe slightly confusing versus (if Antecedent then Consequent) rules, 
 % and other choices would be possible, e.g. Python's or C et.al... but this still feels
@@ -76,5 +76,6 @@
 :- op(1050,fx,(<-)).
 % -> is already defined as 1050, xfy, which will do given that lps.js does not support if-then-elses
 :- op(700,xfx,(<=)).
+
 
 

@@ -185,7 +185,7 @@ push_lps_dialect(Was, M):-
      op(900,fy,(M:not)), 
      op(1200,xfx,(M:then)),
      op(1185,fx,(M:if)),
-     op(1200,xfx,(M:if)),
+     op(1190,xfx,(M:if)),
      op(1100,xfy,(M:else)), 
      op(1050,xfx,(M:terminates)),
      op(1050,xfx,(M:initiates)),
