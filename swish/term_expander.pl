@@ -38,7 +38,7 @@ maybe_inform(_Module,NiceTerm,ExpandedTerm):-
           format(user_error,'~N~p.~n',[NiceTerm-->ExpandedTerm]),
           flush_output(user_error)))).
 
-:- module_transparent(user:term_expansion/2).
+:- module_transparent(system:term_expansion/2).
 system:term_expansion(NiceTerm,ExpandedTerm):- 
   current_prolog_flag(emulated_dialect,lps),
   % compound(NiceTerm), NiceTerm \= (_:_), 

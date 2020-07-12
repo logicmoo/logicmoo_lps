@@ -60,7 +60,7 @@ swish_config:config(include_alias,	system).
 :- multifile pengines:prepare_module/3.
 pengines:prepare_module(Module, swish, Options) :- 
 	style_check(-discontiguous), style_check(-singleton),       
-        asserta(Module:swish_options([swish_module=Module,Options])).
+        asserta(Module:swish_options([swish_module=Module|Options])).
         
 
 % If you consider refactoring this out to somewhere else: somehow these must be after use_module('../../swish/swish'):
