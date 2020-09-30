@@ -206,8 +206,8 @@ u_swiclause(H,B,Ref) :- db_lps_program_module(DB),clause(DB:H,B,Ref).
 
 % ...and finally the generic SWI support
 
-
 :- thread_local(t_l:lps_program_module/1). 
+
 :- dynamic(non_t_l:a_lps_program_module/1). 
 
 % necessary to call at the beginning of any user goal from SWISH that interacts with the LPS program

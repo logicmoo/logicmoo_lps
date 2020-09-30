@@ -1,5 +1,5 @@
 
-:- module(lps_term_expander, [lps_term_expander/3]).
+:- module(lps_term_expander, [lps_term_expander/3,lps_f_term_expansion_now/3]).
 
 :- nodebug(lps(term_expand)).
 
@@ -46,10 +46,11 @@ lps_f_term_expansion_now(_Module,NiceTerm,ExpandedTerm) :-
 
 is_lps_module_and_stream_ok(Module):- dialect_input_stream(In), tmp:module_dialect_lps(In,_,Module,_),!.
 is_lps_module_and_stream_ok(Module):- debugging(lps(term_expand)), 
+     use_module(library(listing)),
      dialect_input_stream(In),
      dmsg(tryed(tmp:module_dialect_lps(In,_,Module,_))),
-     listing(tmp:module_dialect_lps/4),!.
-is_lps_module_and_stream_ok(Module):- tmp:module_dialect_lps(_,_,Module,_), !.
+     listing(tmp:module_dialect_lps/4),!,fail.
+%is_lps_module_and_stream_ok(Module):- tmp:module_dialect_lps(_,_,Module,_), !.
 
 lps_term_expander(Module,NiceTerm,ExpandedTerm):- 
   current_prolog_flag(emulated_dialect,lps) ,

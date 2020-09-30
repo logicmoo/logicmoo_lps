@@ -268,6 +268,15 @@ user:goal_expansion(In, Out) :-
     prolog_load_context(dialect, lps),
     lps_gOAL_expansion(In, Out).
 
+system:term_expansion(In, PosIn, Out, PosOut) :- 
+  prolog_load_context(dialect, lps),
+  In == (:- include(system('date_utils.pl'))), 
+  PosIn=PosOut, 
+  expects_dialect(swi),
+  Out = [(:- expects_dialect(swi)),
+         (:- include(system('date_utils.pl'))),
+         (:- expects_dialect(lps))],!.
+
 system:term_expansion(In, PosIn, Out, PosOut) :- In == end_of_file,
    prolog_load_context(dialect, lps),
    dialect_input_stream(StreamIn),

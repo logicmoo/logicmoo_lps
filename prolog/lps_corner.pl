@@ -17,6 +17,7 @@ golps(T,DFAgraph,Options) :-
     ))),
     visualizer:gojson(_File, [dc, silent|Options], [], T, DFAgraph).
 
+
 :- user:ensure_loaded(library(dialect/lps)).
 :- interpreter:use_module(library('../engine/interpreter.P')).
 :- lps_term_expander:use_module(library('../swish/term_expander')).
