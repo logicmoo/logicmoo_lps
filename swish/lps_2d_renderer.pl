@@ -5,7 +5,9 @@
 :- use_module(library(http/html_write)).
 :- use_module(library(http/term_html)).
 :- use_module(library(http/js_write)).
+:- if(exists_source(swish(lib/render))).
 :- use_module(swish(lib/render)).
+:- endif.
 
 :- multifile user:extra_swish_resource/1. 
 user:extra_swish_resource(script([src('/lps/2dWorld.js')],[])).

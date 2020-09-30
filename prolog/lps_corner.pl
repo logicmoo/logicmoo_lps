@@ -1,3 +1,4 @@
+
 :- module(lps_corner,[golps/1,golps/3]).
 :- asserta(swish:is_a_module).
 

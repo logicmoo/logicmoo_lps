@@ -42,7 +42,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 :- use_module(library(http/js_write)).
 :- use_module(library(http/http_json)).
 :- use_module(library(http/http_parameters)).
+
+:- if(exists_source(swish(lib/render))).
 :- use_module(swish(lib/render)).
+:- endif.
 
 % explicit imports below, commenting this to avoid "weak imports" warnings 
 % :- use_module(library('../engine/interpreter.P')).

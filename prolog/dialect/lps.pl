@@ -29,7 +29,7 @@ expects_dialect/1:
 @author Douglas R. Miles
 */
 
-:- module(lps, [pop_lps_dialect/0,push_lps_dialect/0]).
+:- module(lps, [pop_lps_dialect/0,push_lps_dialect/0,dialect_input_stream/1]).
 % :- asserta(swish:is_a_module).
 
 
@@ -51,7 +51,7 @@ expects_dialect/1:
 % :- notrace(system:ensure_loaded(library(operators))).
 
 
-lps_debug(Info):- ignore(notrace(catch(dmsgln(Info),_,true))).
+lps_debug(Info):- ignore(notrace(catch(dmsg(Info),_,true))).
 % lps_debug(X):- format(user_error,'~N% LPS_DEBUG: ~q.~n',[X]),flush_output(user_error).
 
 %%	lps_gOAL_expansion(+In, +Out)
@@ -91,7 +91,7 @@ lps_gOAL_expansion(style_check(Style),
             file_errors(fail)
           ]),
    asserta((user:file_search_path(library, Dir)))).
-
+/*
 :- prolog_load_context(directory, ThisDir),
    absolute_file_name('lps_autoload', Dir,
 			       [ file_type(directory),
@@ -101,7 +101,7 @@ lps_gOAL_expansion(style_check(Style),
 			       ]),
       asserta((user:file_search_path(library, Dir) :-
 	prolog_load_context(dialect, lps))).
-
+*/
 :- user:file_search_path(lps_library, Dir) -> true;
     (prolog_load_context(directory, ThisDir),
          absolute_file_name('../..', Dir,
@@ -147,7 +147,7 @@ calc_dialect_module(OM):-
      lps_debug([ti=TM,load=Load,strip=Strip,ctx=Ctx,sm=SM,lps=M,using=OM]).     
 
 
-   :- volatile(tmp:module_dialect_lps/4).
+    :- volatile(tmp:module_dialect_lps/4).
 :- thread_local(tmp:module_dialect_lps/4).
 
 
@@ -238,7 +238,7 @@ push_lps_dialect_now(Was, M):-
      op(1050,fx,(M:(<-))),
 % -> is already defined as 1050, xfy, which will do given that lps.js does not support if-then-elses
      op(700,xfx,((M:(<=))))],Undo),
-   %ignore(retract(tmp:module_dialect_lps(StreamIn,_,_,_))),     
+   %ignore(retract(tmp:module_dialect_lps(StreamIn,_,_,_))), 
    asserta(tmp:module_dialect_lps(StreamIn,Was,M,Undo)),!.
 
 dialect_input_stream(StreamIn):- prolog_load_context(stream,StreamIn)->true;current_input(StreamIn).
