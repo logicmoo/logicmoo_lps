@@ -3,6 +3,48 @@
 
     `?- pack_install(lps_corner). `
 
+ Like
+
+```
+test_installer@ubuntu:~$ swipl
+Welcome to SWI-Prolog (threaded, 64 bits, version 8.3.8-14-g6ab186fbb-DIRTY)
+SWI-Prolog comes with ABSOLUTELY NO WARRANTY. This is free software.
+Please run ?- license. for legal details.
+
+For online help and background, visit https://www.swi-prolog.org
+For built-in help, use ?- help(Topic). or ?- apropos(Word).
+
+?- pack_list_installed.
+% There are no extra packages installed.
+% Please visit https://www.swi-prolog.org/pack/list.
+true.
+
+?- pack_install(lps_corner).
+% Contacting server at https://www.swi-prolog.org/pack/query ... ok
+Install lps_corner@2.0.2 from GIT at https://github.com/TeamSPoon/lps_corner.git Y/n?
+
+Create directory for packages
+   (1) * /home/test_installer/.local/share/swi-prolog/pack
+   (2)   Cancel
+
+Your choice?
+% Cloning into '/home/test_installer/.local/share/swi-prolog/pack/lps_corner'...
+% Contacting server at https://www.swi-prolog.org/pack/query ... ok
+% "lps_corner.git" was downloaded 2 times
+Package:                lps_corner
+Title:                  LPS Corner with SWISH and Dialect
+Installed version:      2.0.2
+Author:                 Douglas R. Miles <logicmoo@gmail.com>
+Maintainer:             TeamSPoon <https://github.com/TeamSPoon/>
+Packager:               TeamSPoon/LogicMoo <https://github.com/TeamSPoon/>
+Home page:              https://github.com/TeamSPoon/lps_corner
+Download URL:           https://github.com/TeamSPoon/lps_corner/releases/*.zip
+Activate pack "lps_corner" Y/n?
+true.
+
+?-
+```
+
 
 ```  
 
