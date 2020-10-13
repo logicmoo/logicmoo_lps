@@ -1,8 +1,32 @@
 
-# Installation using SWI-Prolog 7.1.x
+# Installation using SWI-Prolog 7.1.x of Greater thru pack_install/1 #
 
     `?- pack_install(lps_corner). `
 
+
+```  
+
+test_installer@ubuntu:~$ swipl
+Welcome to SWI-Prolog (threaded, 64 bits, version 8.3.8-14-g6ab186fbb-DIRTY)
+SWI-Prolog comes with ABSOLUTELY NO WARRANTY. This is free software.
+Please run ?- license. for legal details.
+
+For online help and background, visit https://www.swi-prolog.org
+For built-in help, use ?- help(Topic). or ?- apropos(Word).
+
+?- ensure_loaded(library('../examples/binaryChop2')).
+Extensions directory: /home/test_installer/.local/share/swi-prolog/pack/lps_corner/swish/extensions
+user extensions missing.
+Warning: Local definition of user:real_time_beginning/1 overrides weak import from db
+true.
+
+?- use_module(library(lps_corner)).
+true.
+
+?- golps(X).
+X = lps_visualization(_14816{groups:[_13432{content:"left(A)", id:"left/1", order:3, subgroupStack:"false"}, _13510{content:"right(A)", id:"right/1", order:3, subgroupStack:"false"}, _13588{content:"searching(A)", id:"searching/1", order:3, subgroupStack:"false"}, _13654{content:"Actions", id:"action", order:4}], items:[_13776{content:"0", end:2, group:"left/1", id:0, start:1, subgroup:"0", title:"Fluent left(0) initiated at 1<br/>and terminated at transition to 2"}, _13902{content:"5", end:4, group:"left/1", id:1, start:2, subgroup:"5", title:"Fluent left(5) initiated at 2<br/>and terminated at transition to 4"}, _14028{content:"7", end:21, group:"left/1", id:2, start:4, subgroup:"7", title:"Fluent left(7) initiated at 4<br/>and terminated at transition to 21"}, _14154{content:"7", end:21, group:"right/1", id:3, start:3, subgroup:"7", title:"Fluent right(7) initiated at 3<br/>and terminated at transition to 21"}, _14280{content:"9", end:3, group:"right/1", id:4, start:1, subgroup:"9", title:"Fluent right(9) initiated at 1<br/>and terminated at transition to 3"}, _14406{content:"60", end:21, group:"searching/1", id:5, start:1, subgroup:"60", title:"Fluent searching(60) initiated at 1<br/>and terminated at transition to 21"}, ...{... : ..., ... : ..., ... : ..., ... : ..., ... : ..., ... : ..., ... : ...}|...]}, []).
+
+```
 
 
 
