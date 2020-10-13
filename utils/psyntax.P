@@ -35,7 +35,7 @@
 unswi_functor(P,F,A):- \+ compound(P),!,functor(P,F,A).
 unswi_functor(P,F,A):- compound_name_arity(P,F,A).
 guarded_univ(P =.. L):- compound(P),!,compound_name_arguments(P,F,Args),L=[F|Args].
-guarded_univ(P =.. L):- catch(P =.. L,E,(dumpST,throw(E))).
+guarded_univ(P =.. L):- catch(P =.. L,E,(throw(error(guarded_univ(P =.. L),E)))).
 
 :- if(current_module(swish)). 
 % first, SWISH specific; see comments in interpreter.P

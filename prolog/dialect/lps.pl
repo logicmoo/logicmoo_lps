@@ -51,7 +51,7 @@ expects_dialect/1:
 % :- notrace(system:ensure_loaded(library(operators))).
 
 
-lps_debug(Info):- ignore(notrace(catch(dmsg(Info),_,true))).
+lps_debug(Info):- ignore(notrace((debug(lps(dialect),'~N% ~p.',[Info])))).
 % lps_debug(X):- format(user_error,'~N% LPS_DEBUG: ~q.~n',[X]),flush_output(user_error).
 
 %%	lps_gOAL_expansion(+In, +Out)
@@ -62,7 +62,8 @@ lps_debug(Info):- ignore(notrace(catch(dmsg(Info),_,true))).
 
 lps_gOAL_expansion(expects_dialect(Dialect), Out):- 
    % in case it is used more than once
-   lps == Dialect -> Out = nop(expects_dialect(Dialect)) 
+   lps == Dialect -> 
+       Out = debug(lps(term_expansion),'~q.',[(expects_dialect(Dialect))])
      ; Out=pop_lps_dialect.
 /*
 lps_gOAL_expansion(eval_arith(Expr, Result),
@@ -137,7 +138,7 @@ prolog:message(lps_unsupported(Goal)) -->
 	[ 'LPS emulation (lps.pl): unsupported: ~p'-[Goal] ].
 
 
-:- use_module(library(pengines),[pengine_self/1]).
+:- use_module(library(pengines),[pengine_self/1]). 
 
 calc_dialect_module(OM):- pengine_self(OM),!.
 calc_dialect_module(OM):- 
@@ -173,9 +174,11 @@ lps:setup_dialect:-
 
 
 % :- prolog_dialect:asserta((())).
+:- thread_local(interpreter:lps_program_module/1).
 
-% get_lps_alt_user_module( user, db):-!.
+
 get_lps_alt_user_module(_User,LPS_USER):- interpreter:lps_program_module(LPS_USER),!.
+get_lps_alt_user_module( user, db):-!.
 get_lps_alt_user_module( User,LPS_USER):- is_lps_alt_user_module(User,LPS_USER),!.
 %get_lps_alt_user_module(_User,LPS_USER):- interpreter:lps_program_module(LPS_USER),!.
 
@@ -251,15 +254,15 @@ pop_lps_dialect:-
     retract(tmp:module_dialect_lps(StreamIn,Was,M,Undo)),!,
     pop_operators(Undo),
     lps_debug(pop_lps_dialect(StreamIn,M->Was)),
-    nop('$set_source_module'(Was)),!,
+    %nop('$set_source_module'(Was)),!,
     lps_debug(ops).
 pop_lps_dialect:-
     retract(tmp:module_dialect_lps(StreamIn,Was,M,Undo)),!,
     print_message(warning, format('~q', [warn_pop_lps_dialect_fallback(StreamIn,M->Was)])),
-    dumpST,
-    lps_debug(ops),
+    %dumpST,
+    %lps_debug(ops),
     pop_operators(Undo),    
-    nop('$set_source_module'(Was)),!,
+    %nop('$set_source_module'(Was)),!,
     lps_debug(ops).
 pop_lps_dialect:- 
    lps_debug(ops),

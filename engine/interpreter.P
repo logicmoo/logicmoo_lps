@@ -98,7 +98,7 @@ qcatch_t(G):-  tracing ->
 :- if(current_module(swish)).
 
 % First a SWISH specificity - rather than use the db module, will use pengine's dynamic module (or a copy of it made into db, see background option)
-
+                                 
 :- use_module(library(pengines),[pengine_self/1]).
 
 % If performance becomes bad (due to nonindexed access inside the pengine_self predicate) we should pass M as arg
@@ -168,7 +168,8 @@ u_swiclause(H,B,Ref) :- must_lps_program_module(M), clause(M:H,B,Ref).
 
 :- endif.
 
-must_lps_program_module(M):- t_l:lps_program_module(M)*->true;((throw(missing(t_l:lps_program_module/1, M))),ignore(M=db)).
+must_lps_program_module(M):- t_l:lps_program_module(M)*->true;
+  (M=db -> true; ((throw(missing(t_l:lps_program_module/1, M))),ignore(M=db))).
 
 :- if(\+ current_module(swish)).
 % Now support for vanilla SWI Prolog
@@ -193,7 +194,7 @@ uasserta(X) :- db_lps_program_module(DB),asserta(DB:X).
 uassertz(X) :- db_lps_program_module(DB),assertz(DB:X).
 uretractall(X) :- db_lps_program_module(DB),retractall(DB:X).
 uretract(X) :- db_lps_program_module(DB),retract(DB:X).
-u_user_predicate(X) :- db_lps_program_module(X,F,N),must_lps_program_module(DB),current_predicate(DB:F/N).
+u_user_predicate(MX) :- strip_module(MX,_,X), functor(X,F,N), must_lps_program_module(DB),current_predicate(DB:F/N).
 
 callprolog(G) :- predicate_property(G,built_in), !, call(G). 
 callprolog(G) :- db_lps_program_module(DB),call(DB:G).

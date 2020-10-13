@@ -18,6 +18,8 @@ sandbox:safe_primitive(user:mylog(_M)).
 %:- use_module(library(http/http_log)). % uncomment to produce httpd.log
 %:- set_setting_default(http:logfile, 'data/httpd.log'). % swish's writable sub directory
 
+
+
 :- multifile swish_config:config/2.
 :- dynamic swish_config:config/2.
 % swish_config:config(show_beware,false).
@@ -42,9 +44,9 @@ swish_config:config(include_alias,	system).
  :- endif.
 :- endif.
 
+
 :- if(exists_source(swish(lib/render))).
 :- use_module(swish(lib/render)).
-:- endif.
 
 :- use_module(library(http/http_dispatch)). % ,except([extend/3])).
 :- use_module(swish(lib/plugin/login)).
@@ -56,14 +58,18 @@ swish_config:config(include_alias,	system).
 :- use_module(lps_timeline_renderer,[]).
 :- multifile(user:'swish renderer'/2). % to avoid SWISH warnings in other files
 :- dynamic(user:'swish renderer'/2). % to avoid SWISH warnings in other files
+
 :- use_rendering(lps_2d). % this will be the preferred... if available for the current visualization
 :- use_rendering(lps_timeline).
 :- use_rendering(graphviz). % for state/transition diagrams
+
+:- endif.
 
 :- multifile pengines:prepare_module/3.
 pengines:prepare_module(Module, swish, Options) :- 
 	style_check(-discontiguous), style_check(-singleton),       
         asserta(Module:swish_options([swish_module=Module|Options])).
+
         
 
 % If you consider refactoring this out to somewhere else: somehow these must be after use_module('../../swish/swish'):
@@ -280,7 +286,9 @@ serve_lps_resources(Request) :- % http://localhost:3050/lps/foo/Gruntfile.js wor
         http_reply_file(lps_resources(Info), [], Request).
 
 % hack SWISH to inject our CSS and Google Analytics fragment...
+:- if(exists_source(swish(lib/page))).
 :- use_module(swish(lib/page)).
+:- endif.
 :- use_module(library(http/html_write)).
 :- use_module(library(http/http_path)).
 

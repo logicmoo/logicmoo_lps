@@ -48,7 +48,7 @@ is_lps_module_and_stream_ok(Module):- dialect_input_stream(In), tmp:module_diale
 is_lps_module_and_stream_ok(Module):- debugging(lps(term_expand)), 
      use_module(library(listing)),
      dialect_input_stream(In),
-     dmsg(tryed(tmp:module_dialect_lps(In,_,Module,_))),
+     debug(lps(term_expand),'~p',(tryed(tmp:module_dialect_lps(In,_,Module,_)))),
      listing(tmp:module_dialect_lps/4),!,fail.
 %is_lps_module_and_stream_ok(Module):- tmp:module_dialect_lps(_,_,Module,_), !.
 
@@ -71,4 +71,4 @@ system:term_expansion(NiceTerm,ExpandedTerm):-
   % compound(NiceTerm), NiceTerm \= (_:_), 
   % context_module(Module),
   prolog_load_context(module,Module),
-  show_failure(lps_term_expander(Module,NiceTerm,ExpandedTerm)),!.
+  lps_term_expander(Module,NiceTerm,ExpandedTerm),!.

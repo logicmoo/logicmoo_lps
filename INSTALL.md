@@ -1,3 +1,13 @@
+
+# Installation using SWI-Prolog 7.1.x
+
+    `?- pack_install(lps_corner). `
+
+
+
+
+
+
 # Installing LPS #
 
 ## LPS on SWISH (local or cloud web server) ##

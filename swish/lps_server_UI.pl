@@ -53,7 +53,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 :- multifile sandbox:safe_primitive/1.
 
+:- if(exists_source(swish(lib/render))).
 :- register_renderer(lps_server_UI, "Access to a LPS server execution").
+:- endif.
 
 :- discontiguous(lps_server_UI:term_rendering/5).
 
@@ -77,7 +79,8 @@ tt:- threadutil:threads. % ...BUT STILL No permission to call sandboxed threadut
 % swipl -l user_module_file.pl -l ../../swish/server.pl -g "assert(lps_server_UI:allow_anonymous_powerful_ops)" -g server:server
 :- dynamic allow_anonymous_powerful_ops/0.
 % allow_anonymous_powerful_ops.
-
+:- use_module(library(http/http_wrapper),[http_current_request/1]).
+allow_anonymous_powerful_ops:- \+ http_current_request(_).
 
 % call this before every potentially dangerous operation:
 check_powerful_user(serve_ethereum) :- user_is_known, !. %TODO: move out of open source
@@ -91,7 +94,7 @@ user_is_known :- allow_anonymous_powerful_ops -> true ; lps_user(User), User\=un
 
 lps_user_is_super :- allow_anonymous_powerful_ops -> true ; (lps_user(User), super_user(User)).
 
-any_call(G) :- check_powerful_user(sudo), G.
+any_call(G) :- check_powerful_user(sudo), call(G).
 
 sandbox:safe_primitive(lps_server_UI:any_call(G)) :- nonvar(G).
 
