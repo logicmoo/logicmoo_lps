@@ -60,7 +60,10 @@ lps_debug(Info):- ignore(notrace(catch(dmsg(Info),_,true))).
 %	expansions  below  maintain  optimization    from   compilation.
 %	Defining them as predicates would loose compilation.
 
-lps_gOAL_expansion(expects_dialect(SWI), pop_lps_dialect):- swi == SWI, !.
+lps_gOAL_expansion(expects_dialect(Dialect), Out):- 
+   % in case it is used more than once
+   lps == Dialect -> Out = nop(expects_dialect(Dialect)) 
+     ; Out=pop_lps_dialect.
 /*
 lps_gOAL_expansion(eval_arith(Expr, Result),
 	      Result is Expr).
@@ -267,6 +270,8 @@ pop_lps_dialect:-
 user:goal_expansion(In, Out) :-
     prolog_load_context(dialect, lps),
     lps_gOAL_expansion(In, Out).
+
+
 
 system:term_expansion(In, PosIn, Out, PosOut) :- 
   prolog_load_context(dialect, lps),
