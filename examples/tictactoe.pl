@@ -1,6 +1,5 @@
 
-
-:- trace.
+%:- trace.
 :- expects_dialect(lps).
 
 maxTime(5).
@@ -63,5 +62,5 @@ twoFilled(P,(R,C3)) at T
 if 	on(P, (R, C1)) at T, on(P, (R, C2)) at T, C1 \= C2.
 % twoFilled(P,D3) at T if diagonal(Ds), member(D1,Ds), member(D2, Ds), member(D3, Ds),D1 \= D2, on(P, D1) at T, on(P, D2) at T.
 
-:- trace.
+%:- trace.
 
