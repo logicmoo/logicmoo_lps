@@ -56,7 +56,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 % This fact will contain this file's directory; its presence also denotes "LPS running"
 :- dynamic lps_engine_directory/1.
 
-:- if(\+ current_prolog_flag(dialect, swi)).
+is_supported_prolog :- current_prolog_flag(dialect, swi), !.
+is_supported_prolog :- current_prolog_flag(emulated_dialect, lps).
+
+:- if(\+ is_supported_prolog).
 :- writeln("LPS requires SWI-Prolog"), throw(swi_prolog_required).
 :- endif.
 
@@ -169,7 +172,7 @@ u_swiclause(H,B,Ref) :- must_lps_program_module(M), clause(M:H,B,Ref).
 :- endif.
 
 must_lps_program_module(M):- t_l:lps_program_module(M)*->true;
-  (M=db -> true; ((throw(missing(t_l:lps_program_module/1, M))),ignore(M=db))).
+  (M=db -> true; ((print_error_throw(missing(t_l:lps_program_module/1, M))),ignore(M=db))).
 
 :- if(\+ current_module(swish)).
 % Now support for vanilla SWI Prolog
@@ -298,7 +301,7 @@ print_error(Type,Message,Position) :- option(swish), option(background(_)), !, %
 	do_write([Type,':',Message,' ',Position]).
 print_error(Type,Message,Position) :- 
 	print_message(Type,lps_error(Message,Position)). % SWI's universal messaging pipeline
-
+ 
 
 :- dynamic git_version_cache/1.
 :- use_module(library(git),[git_describe/2]).
@@ -943,6 +946,9 @@ state_changed(S) :- nb_setarg(1,S,true).
 
 %%% From here on, generic Prolog code
 
+print_error_throw(Term) :- print_error(error,throw(Term)),nop(throw).
+print_error_fail(Message):- print_error(error,Message), nop(fail).
+
 print_error(Type,Message) :- print_error(Type,Message,null).
 	
 my_load_dyn(F) :- my_load_dyn(F,false).
@@ -1106,7 +1112,7 @@ program_predicate(minCycleTime(_)).
 % generate two sets of pre conditions, as per their dependence (or not) on both current and next state
 preprocess_preconditions :- d_pre(Cond), classify_precondition(Cond,Type), assert(d_pre(Type,Cond)), fail.
 preprocess_preconditions :- ( option(non_prospective) ; \+ option(dc)), d_pre(both,_), !, 
-	throw(nextstate_dependency_with_non_prospective_option_or_lack_dc).
+	print_error_throw(nextstate_dependency_with_non_prospective_option_or_lack_dc).
 preprocess_preconditions.
 
 % classify_precondition(+Precondition,-Type) 
@@ -1249,7 +1255,7 @@ go_(File,OptionsList,ResultFluents) :-
 	forall(member(RF,ResultFluents), (nonvar(RF), RF=_-_)),
 	parse_options(OptionsList),
 	(nonvar(File) -> true; 
-			( (option(make_test), \+ option(swish)) -> print_error(error,'ERROR in options: make_test requires a File name'), fail 
+			( (option(make_test), \+ option(swish)) -> print_error(error, 'ERROR in options: make_test requires a File name')
 			; true)),
 	cleanup_program, cleanup_engine,
 	
@@ -1275,7 +1281,7 @@ go_(File,OptionsList,ResultFluents) :-
 		fail
 		; true
 	),
-	((observe(_, 1)) -> throw(no_events_admissible_in_cycle_zero); true),
+	((observe(Events, 1)) -> print_error_throw(no_events_admissible_in_cycle_zero(Events)); true),
 	cputime(T0),
     uassertz(current_goal(0)),
     uassertz(depth(0)),
@@ -1731,28 +1737,28 @@ parse_options(Options) :-
 	% when running a test the options will be imposed by the test file:
 	% (member(run_test,Options) -> Options=[_]; true),  commenting this out to allow 'dc' option to be added
 	( (member(initialize_only,Options), (member(background(_),Options))) ->
-		print_error(error,'initialize_only option incompatible with background'), fail
+		print_error_fail('initialize_only option incompatible with background')
 		; true),
 	( (member(silent,Options), (member(verbose,Options))) ->
-		print_error(error,'silent option incompatible with verbose'), fail
+		print_error_fail('silent option incompatible with verbose')
 		; true),
 	( (member(cycle_hook(_),Options), (member(make_test,Options) ; member(manual,Options))) ->
-		print_error(error, 'cycle_hook option incompatible with make_test and with manual'), fail
+		print_error_fail('cycle_hook option incompatible with make_test and with manual')
 		; true),
 	( (member(meta_actions,Options), member(swish,Options)) ->
-		print_error(error, 'meta_actions option not supported on SWISH.'), fail
+		print_error_fail('meta_actions option not supported on SWISH.')
 		; true),	
 	( (member(manual,Options), member(make_test,Options), \+ member(swish,Options)) ->
-		print_error(error, 'make_test option incompatible with manual option.'), fail
+		print_error_fail('make_test option incompatible with manual option.')
 		; true),	
 	( ((member(run_test,Options);member(make_test,Options)), member(background(_),Options)) ->
-		print_error(error, 'run_test or make_test option incompatible with background execution.'), fail
+		print_error_fail('run_test or make_test option incompatible with background execution.')
 		; true),	
 	( ((member(run_test,Options);member(make_test,Options);member(no_parallel,Options); \+member(dc,Options)), member(restore(_),Options)) ->
-		print_error(error, 'run_test/make_test/no_parallel options are incompatible with restore; restore also requires dc'), fail
+		print_error_fail('run_test/make_test/no_parallel options are incompatible with restore; restore also requires dc')
 		; true),	
 	( (\+ member(non_prospective,Options), \+ member(dc,Options)) ->
-		print_error(error, 'prospective option requires dc'), fail
+		(print_error_fail('prospective option requires dc'), nop(breaks_it(Options =[_|Tail], nb_setarg(Options,1,[dc|Tail]))))
 		; true),	
 	parse_options_(Options).
 
@@ -1765,33 +1771,31 @@ parse_options_([initialize_only|Rest]) :- !,
 parse_options_([preamble_goal(Preamble,Result)|Rest]) :- !, 
 	% a goal executed once after the LPS program has loaded, just prior to the first cycle
 	% it must not fail
-    (nonvar(Preamble)->true; print_error(error, 'Preamble goal must not be a variable'), fail),
+    (nonvar(Preamble)->true; print_error_fail('Preamble goal must not be a variable')),
     uassertz(option(preamble_goal(Preamble,Result))),
     parse_options_(Rest).
 parse_options_([timeout(Max)|Rest]) :- !, 
-    (number(Max)->true; print_error(error, 'timeout option argument must be a float (seconds) '), fail),
+    (number(Max)->true; print_error_fail('timeout option argument must be a float (seconds) ')),
     uassertz(option(timeout(Max))),
     parse_options_(Rest).
 parse_options_([swish|Rest]) :- !, % don't cleanup db (nor load the program), the environment will do it
     uassertz(option(swish)),
     parse_options_(Rest).
 parse_options_([dc|Rest]) :- !,
-    (current_prolog_flag(dialect, swi) 
+    (is_supported_prolog 
     	-> uassertz(option(dc)) 
     	; 
-    	print_error(error, 'delimited continuations option is available only for SWI Prolog '),
-    	fail
+    	print_error_fail('delimited continuations option is available only for SWI Prolog ')    	
     	),
     parse_options_(Rest).
 parse_options_([non_prospective|Rest]) :- !, 
     uassertz(option(non_prospective)),
     parse_options_(Rest).
 parse_options_([no_parallel|Rest]) :- !, % DEPRECATED...
-    (current_prolog_flag(dialect, swi) 
+    (is_supported_prolog 
     	-> uassertz(option(no_parallel)) 
     	; 
-    	print_error(error, 'no_parallel is a delimited continuations option, available only for SWI Prolog '),
-    	fail
+    	print_error_fail('no_parallel is a delimited continuations option, available only for SWI Prolog ')
     	),
     parse_options_(Rest).
 parse_options_([verbose|Rest]) :- !,
@@ -1805,7 +1809,7 @@ parse_options_([log_composites|Rest]) :- !,
     uassertz(option(log_composites)),
     parse_options_(Rest).
 parse_options_([sample(Fluents)|Rest]) :- !,
-	(is_list(Fluents) -> true; print_error(error, "sample(IntensionalFluents) must have a list argument"), fail),
+	(is_list(Fluents) -> true; print_error_fail("sample(IntensionalFluents) must have a list argument")),
 	% can't check whether they're actually fluents... as the program is not loaded yet
     uassertz(option(sample(Fluents))),
     parse_options_(Rest).
@@ -1828,17 +1832,17 @@ parse_options_([cycle_hook(Predicate,Fluents,Actions)|Rest]) :- !,
 	% Fluents and (basic) Actions are lists of templates; the cycle hook predicate should collect all matching tuples
 	% see examples/external_interfaces/
 	((atom(Predicate),is_list(Fluents),is_list(Actions))->true
-	; print_error(error, 'cycle_hook option first argument must be an atom, a predicate name; then fluent and action lists.'), fail),
+	; print_error_fail('cycle_hook option first argument must be an atom, a predicate name; then fluent and action lists.')),
 	uassertz(option(cycle_hook(Predicate,Fluents,Actions))),
 	parse_options_(Rest).
 parse_options_([observations(Obs)|Rest]) :- !,
 	((is_list(Obs), forall(member(observe(L,T),Obs),(is_list(L),integer(T))) ) -> true
-	; print_error(error, 'observations option must contain a list of observe(List,Time).'), fail),
+	; print_error_fail('observations option must contain a list of observe(List,Time).')),
 	uassertz(option(observations(Obs))),
 	parse_options_(Rest).
 parse_options_([delta_state(State)|Rest]) :- !,
 	((is_list(State), forall(member(F,State), (nonvar(F), (F = + _ ; F = - _ ; F = prolog(FF), nonvar(FF), \+ functor(FF,':-',_)))) ) -> true
-	; print_error(error, 'delta_state option must contain an argument with a list of +Fluent or -Fluent or prolog(FactToAssert).'), fail),
+	; print_error_fail('delta_state option must contain an argument with a list of +Fluent or -Fluent or prolog(FactToAssert).')),
 	uassertz(option(delta_state(State))),
 	parse_options_(Rest).
 % parameter for declaration generation by alternative syntaxes; default (absent) may help LPS program debugging
@@ -1848,22 +1852,22 @@ parse_options_([auto_declarations|Rest]) :- !,
 	parse_options_(Rest).
 parse_options_([manual|Rest]) :- !,
 	(observe(_, _) -> 
-		print_error(error, 'with ''manual'' option no observations in the program are allowed.'), fail
+		print_error_fail('with ''manual'' option no observations in the program are allowed.')
 		;true),
 	uassertz(option(manual)),
 	parse_options_(Rest).
 parse_options_([background(ID)|Rest]) :- !,
 	(var(ID) -> 
-		print_error(error, 'background thread failed to create.'), fail
+		print_error_fail('background thread failed to create.')
 		;true),
-	( \+ current_prolog_flag(dialect, swi) ->
-		print_error(error, 'background execution requires SWI Prolog.'), fail
+	( \+ is_supported_prolog ->
+		print_error_fail('background execution requires SWI Prolog.')
 		;true),
 	uassertz(option(background(ID))),
 	parse_options_(Rest).
 parse_options_([restore(File)|Rest]) :- !,
 	(\+ atom(File) -> 
-		print_error(error, 'restored option File name must be an atom.'), fail
+		print_error_fail('restored option File name must be an atom.')
 		;true),
 	uassertz(option(restore(File))),
 	parse_options_(Rest).
@@ -2145,9 +2149,7 @@ time_limited(Step,G,Timeout) :-
 	(option(timeout(MaxTime)) -> true ; MaxTime = 0.75), % by default, less than a second max in each of the following steps
 	catch(call_with_time_limit(MaxTime,G),Ex,(Ex=time_limit_exceeded->Timeout=true;throw(Ex))),
 	(Timeout==true -> 
-		print_error(error,'execution timeout'(Step),null),
-		fail
-		; true).
+		print_error_fail('execution timeout'(Step)) ; true).
 
 % seconds to sleep at the beginning of each cycle; assumes some defaults 
 minCycleTime_(MCT) :- minCycleTime(MCT), !.
@@ -2687,7 +2689,7 @@ leave_step_0 :- uretractall(lps_updating_current_state).
 
 %   Destructively update the state. Used by the non_prospective option:
 updateFluents(Time) :-
-    	( current_prolog_flag(dialect, swi) ->
+    	( is_supported_prolog ->
     		(system_fluent(SF,SFG), uretractall(state(SF)), SFG,  uassertz(state(SF)), fail ; true)
     		; true),
 	findall(Fl, (happens(Ev, Previous, Time), terminated(happens(Ev, Previous, Time), Fl, Cond), holds_all(Cond)), Terms),

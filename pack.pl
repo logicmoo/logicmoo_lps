@@ -1,7 +1,7 @@
 name(lps_corner).
 title('LPS Corner with SWISH and Dialect').
 
-version('2.0.2').
+version('2.0.3').
 download('https://github.com/TeamSPoon/lps_corner/releases/*.zip').
 
 author( 'Douglas R. Miles', 'logicmoo@gmail.com' ).
