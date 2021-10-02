@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Exemplify external events defined as (polled) Prolog predicates

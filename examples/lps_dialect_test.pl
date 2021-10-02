@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % DELIVERY ROBOT DOMAIN IN THE SITUATION CALCULUS

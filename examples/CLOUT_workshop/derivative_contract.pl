@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % contract for derivative of UCITS ETF FTSE MIB

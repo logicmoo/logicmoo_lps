@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 maxTime(20).

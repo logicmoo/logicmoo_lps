@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % This ilustrates a bug: 

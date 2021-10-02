@@ -1,8 +1,4 @@
 
-
-:- expects_dialect(lps).
-
-
 maxRealTime(120).
 
 minCycleTime(0.01).

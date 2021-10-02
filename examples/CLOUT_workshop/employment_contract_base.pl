@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Originally at http://demo.logicalcontracts.com/example/employment_contract.pl

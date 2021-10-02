@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 /* From section 2.2 in http://csp2017.mimuw.edu.pl/data/uploads/papers/CSP2017_paper_24.pdf :

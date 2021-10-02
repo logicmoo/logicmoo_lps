@@ -1,34 +1,24 @@
-# Build a SWISH image, using the SWISH_SHA1 below. This is a simple variation of
-# https://github.com/SWI-Prolog/docker-swish
-# Build with:
-#	docker build -t logicalcontracts/swish-june2020 -f Dockerfile-SWISH-June2020 .
-################
-# If the version below is unavailable, probably use 'latest':
-FROM swipl:8.2.0 as base
+# docker build -t logicalcontracts/swish-june2020 -f Dockerfile-SWISH-June2020 .
+# docker run -it -p 3051:3050 -v ~/git/lps_corner/swish/data:/data logicalcontracts/swish-june2020 
+FROM swipl as base
 
 RUN apt-get update && apt-get install -y \
     git build-essential autoconf curl unzip \
     cleancss node-requirejs
 
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash -
-RUN apt-get install -y nodejs npm
-# RUN npm install -g clean-css clean-css-cli
-# RUN echo '{ "allow_root": true }' > .bowerrc 
-RUN npm i yarn -g
-
-# We'll place this instead on a more "portable" location:
-ENV SWISH_HOME /home/swish
+ENV SWISH_HOME /swish
+#ENV SWISH_SHA1 V1.3.1
 # June 12, 2020:
 ENV SWISH_SHA1 d3c6a784d4c9d6baca661ddc3a228ee42f9f34e9
 
 RUN echo "At version ${SWISH_SHA1}"
-RUN (cd /home && git clone https://github.com/SWI-Prolog/swish.git) && \
-    (cd ${SWISH_HOME} && git checkout -q ${SWISH_SHA1} && make packs && yarn && make src)
-# We don't need   git submodule update --init
+RUN git clone https://github.com/SWI-Prolog/swish.git && \
+    (cd swish && git checkout -q ${SWISH_SHA1})
+RUN make -C /swish RJS="nodejs /usr/lib/nodejs/requirejs/r.js" \
+	yarn-zip packs min
 
 FROM base
-# adapted from... LABEL maintainer "Jan Wielemaker <jan@swi-prolog.org>"
-LABEL maintainer "Miguel Calejo <mc@logicalcontracts.com>"
+LABEL maintainer "Jan Wielemaker <jan@swi-prolog.org>"
 
 RUN apt-get update && apt-get install -y \
     graphviz imagemagick \
@@ -36,13 +26,11 @@ RUN apt-get update && apt-get install -y \
     wamerican && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=base ${SWISH_HOME} ${SWISH_HOME}
-COPY ./entry.sh entry.sh
+COPY --from=base /swish /swish
+COPY entry.sh entry.sh
 
 ENV SWISH_DATA /data
 VOLUME ${SWISH_DATA}
 WORKDIR ${SWISH_DATA}
 
 ENTRYPOINT ["/entry.sh"]
-
-

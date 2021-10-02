@@ -1,7 +1,3 @@
-
-
-:- expects_dialect(lps).
-
 /* 
 ** Author(s): Miguel Calejo
 ** Contact:   info@interprolog.com, http://interprolog.com

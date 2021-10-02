@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 /* Showing if-then-else originating an iteration like behavior, inspired on RAK's:

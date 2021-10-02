@@ -1,7 +1,3 @@
-
-
-:- expects_dialect(lps).
-
 % Example submitted by Fariba, showing backtracking
 % Deprecated, depends on reactive rules with priority
 

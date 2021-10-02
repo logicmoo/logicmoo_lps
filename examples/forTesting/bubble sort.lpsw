@@ -1,13 +1,9 @@
-
-
-:- expects_dialect(lps).
-
 maxTime(7).
 
 initial_state([
 	location(d, 1),
-	location(c, 2)
-	, location(b, 3),
+    location(c, 2),
+    location(b, 3),
     location(a,4)]
 ).
 

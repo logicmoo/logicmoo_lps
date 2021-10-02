@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % single ballot per program instance, added method names as in Solidity original

@@ -1,7 +1,3 @@
-
-
-:- expects_dialect(lps).
-
 initial_state( [] ).
 
 

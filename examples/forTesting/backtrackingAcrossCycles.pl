@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % From Sam Yong's MSc thesis report, page 78

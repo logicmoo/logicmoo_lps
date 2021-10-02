@@ -1,7 +1,3 @@
-
-
-:- expects_dialect(lps).
-
 % Simple example in LPS framework (from Stephen ASP paper):
 % By Fariba Sadri
 reactive_rule( 

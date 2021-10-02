@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % This illustrates the use of assynchronous Ethereum calls

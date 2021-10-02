@@ -1,7 +1,3 @@
-
-
-:- expects_dialect(lps).
-
 fluent(menu(_)).
 fluent(portion(_,_)).
 fluent(biggest_table(_,_)).

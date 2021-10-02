@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Using an "event meta-call" in a precondition to avoid enumerating all forbidden atomic events

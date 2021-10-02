@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Lamport's clock example in LPS

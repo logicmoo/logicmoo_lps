@@ -1,8 +1,4 @@
 
-
-:- expects_dialect(lps).
-
-
 reactive_rule([happens(event1,_9474,_9476),lps_inc(_9476,_9488),holds(condition,_9488)],[happens(action,_9512,_9514),tc(_9488<_9514)]).
 
 l_timeless(lps_inc(_9472,_9474),[_9474 is _9472+1]).

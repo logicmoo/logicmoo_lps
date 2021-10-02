@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 actions lps_terminate.

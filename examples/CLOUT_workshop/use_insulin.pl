@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 /* This is based on the example in Bench-Capon, 

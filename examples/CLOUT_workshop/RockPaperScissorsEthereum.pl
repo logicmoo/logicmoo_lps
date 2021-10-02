@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Rock, Paper, Scissors "gambling" on Ethereum

@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Basd on prospectiveGoat.pl, but with RK fixes

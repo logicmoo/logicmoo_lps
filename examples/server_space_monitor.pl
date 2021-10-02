@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Notice that this background server needs relaunching after SWI Prolog restarts.

@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Minimal example to toggle a Redis binary tag value

@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 /* Late Delivery and Penalty. In case of delayed delivery except for

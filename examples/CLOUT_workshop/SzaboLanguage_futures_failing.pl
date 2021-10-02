@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % First example from https://nakamotoinstitute.org/contract-language/

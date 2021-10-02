@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Formal English specification of the game:

@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Demo lps_terminate action, and Prolog system "output predicate" called as an action

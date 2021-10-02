@@ -1,10 +1,10 @@
 
-
 :- expects_dialect(lps).
 
 % Based on https://www.youtube.com/watch?v=5ms_idvN8Tg 
 
-:- include(example('SimulationKit.pl')).
+%:- include(example('SimulationKit.pl')).
+:- include(('./SimulationKit.pl')).
 
 % Simple conveyor revisited:
 if true at 1 then
@@ -39,7 +39,7 @@ a conveyor method...
 
  */
     
-d(timeless, [[type:rectangle,from:[0,0],to:[600,350],strokeColor:green]]). % bounds for our display
+display(timeless, [[type:rectangle,from:[0,0],to:[600,350],strokeColor:green]]). % bounds for our display
 
 maxTime(70). % minCycleTime(0).
 /** <examples> 

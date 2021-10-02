@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Use with option 'manual', and inject event 'a'.

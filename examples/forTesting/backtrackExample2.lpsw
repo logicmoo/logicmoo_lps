@@ -1,8 +1,4 @@
 
-
-:- expects_dialect(lps).
-
-
 initial_state( [p(1),p(2),c(1,1),c(1,2),r(2)] ).
 
 

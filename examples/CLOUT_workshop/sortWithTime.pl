@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 /* Shortest sorting algorithm:-) A single logical implication, universally quantified on the antecedent.

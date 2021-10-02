@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % golps('examples/forTesting/backgroundBankTransfer.pl',[background(ID),silent])

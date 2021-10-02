@@ -1,6 +1,9 @@
 
-
 :- expects_dialect(lps).
+
+% this must be the FIRST directoive in the file:
+% :- relax_untimed_literals.  % uncomment this to let implicit time vars in rules and composite events stay unbound; 
+
 
 % First, "environmental" information
 initial_state([available(fork(0)),available(fork(1)),available(fork(2)),available(fork(3)),available(fork(4))]).
@@ -34,9 +37,9 @@ fluent(available(_)).
 dine(philosopher(N)) if
     think(philosopher(N)) during _,
     adjacent(F1,philosopher(N),F2),
-    pickup_forks(F1,philosopher(N),F2),
-    eat(philosopher(N)),
-    putdown_forks(F1,philosopher(N),F2).
+    pickup_forks(F1,philosopher(N),F2) to T2,
+    eat(philosopher(N)) from T2 to T3,
+    putdown_forks(F1,philosopher(N),F2) from T3.
 
 pickup_forks(F1,philosopher(_N),_F2) terminates available(F1).
 pickup_forks(_F1,philosopher(_N),F2) terminates available(F2).

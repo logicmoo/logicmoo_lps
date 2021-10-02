@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 /* From "Step by Step Towards Creating a Safe Smart Contract: Lessons and Insights from a Cryptocurrency Lab",

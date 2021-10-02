@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % see diningPhilosphers-client.pl

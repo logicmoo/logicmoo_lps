@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Note the execution of this program is very sensitive to the order 

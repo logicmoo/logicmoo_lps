@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Prolog programs can be called from LPS.

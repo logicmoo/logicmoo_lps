@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % slamodel.lps SLA Model as a smart contract

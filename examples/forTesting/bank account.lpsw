@@ -1,8 +1,4 @@
 
-
-:- expects_dialect(lps).
-
-
 % bank transfer Bob Kowalski 14 Oct 2016
 maxTime(9).
 

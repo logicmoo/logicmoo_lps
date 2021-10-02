@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 /* Adapted by RAK from the simplified loan agreement in Flood and Goodenough, March 2017.

@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % golps('examples/forTesting/backgroundRain2.lps',[background(ID)])

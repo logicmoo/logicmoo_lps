@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 events e(_), f(_).

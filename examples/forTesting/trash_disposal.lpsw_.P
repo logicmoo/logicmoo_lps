@@ -1,8 +1,4 @@
 
-
-:- expects_dialect(lps).
-
-
 initial_state([locked(location2),bin_at(location2),bin_at(location3),trash_at(location1)]).
 
 reactive_rule([holds(trash_at(_8724),_8730)],[holds(bin_at(_8740),_8746),happens(dispose(_8724,_8740),_8746,_8766),tc(_8730=<_8746)]).

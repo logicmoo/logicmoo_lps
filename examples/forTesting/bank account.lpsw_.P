@@ -1,8 +1,4 @@
 
-
-:- expects_dialect(lps).
-
-
 maxTime(9).
 
 initial_state([balance(bob,0),balance(fariba,100)]).

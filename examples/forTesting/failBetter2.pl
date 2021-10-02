@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 events to(_Agent,_Right).

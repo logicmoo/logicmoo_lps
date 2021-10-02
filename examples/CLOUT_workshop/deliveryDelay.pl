@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 /* Example from Accord Project:

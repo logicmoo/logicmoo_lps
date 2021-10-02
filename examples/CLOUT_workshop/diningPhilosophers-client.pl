@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Dining philosophers, detaching the dining table and cutlery from the guests and their seating arrangements 

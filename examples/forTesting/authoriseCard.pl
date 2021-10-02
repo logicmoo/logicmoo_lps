@@ -1,5 +1,4 @@
 
-
 :- expects_dialect(lps).
 
 % Bob's April 3, 2020 email

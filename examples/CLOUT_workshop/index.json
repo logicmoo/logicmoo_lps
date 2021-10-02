@@ -1,7 +1,3 @@
-
-
-:- expects_dialect(lps).
-
 { "comment": "Examples specific to LPS",
 "menu":[ {"group":"lps","rank":30000} ],
 "files":[
